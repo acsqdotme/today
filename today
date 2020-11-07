@@ -281,7 +281,7 @@ def edit_date(args: argparse.Namespace) -> None:
 
 if __name__ == "__main__":
     args = parse_args()
-    if args.render or (not args.render and len(args.dates) > 0):
+    if args.render or (not args.render and len(args.dates) > 1):
         show_dates(args)
     else:
         edit_date(args)
