@@ -1,0 +1,287 @@
+#!/usr/bin/env python3
+#
+# SPDX-FileCopyrightText: 2020 Sotiris Papatheodorou
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# TODO In show_dates() mode, print markdown if stdout is redirected/piped
+# TODO Allow editing whole week and spliting the results into the dates
+# TODO Allow setting a custom suffix, how to handle pretty render?
+
+import argparse
+import datetime
+import os
+import subprocess
+import sys
+
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+from typing import List, Union
+
+
+
+_date_format_file = '%Y%m%d'
+_date_format_pretty = '%Y/%m/%d'
+
+
+
+def journal_dir() -> str:
+    """Return the default journal directory"""
+    try:
+        return os.environ['TODAYDIR']
+    except KeyError:
+        try:
+            return os.environ['XDG_DATA_HOME'] + '/today'
+        except KeyError:
+            return os.environ['HOME'] + '/.local/share/today'
+
+
+
+def editor() -> str:
+    """Return the user's preferred text editor"""
+    try:
+        return os.environ['VISUAL']
+    except KeyError:
+        try:
+            return os.environ['EDITOR']
+        except KeyError:
+            return 'nano'
+
+
+
+def pager() -> str:
+    """Return the user's preferred pager"""
+    try:
+        return os.environ['PAGER']
+    except KeyError:
+        return 'less'
+
+
+
+def printerr(*args, **kwargs) -> None:
+    """Print to stderr prefixed with the program name"""
+    error_prefix = os.path.basename(sys.argv[0]) + ': error:'
+    print(error_prefix, *args, file=sys.stderr, **kwargs)
+
+
+
+def ansi_style(s: str, style: str) -> str:
+    """Return s with a style encoded in ANSI escape sequences"""
+    if not sys.stdout.isatty():
+        return s
+    styles = {'normal': '0', 'bold': '1', 'dim': '2', 'italic': '3',
+            'underline': '4', 'blink': '5', 'reverse': '7', 'crossout': '9'}
+    if style in styles:
+        csi = '\033['
+        return ''.join([csi, styles[style], 'm', s, csi, '0m'])
+    else:
+        return s
+
+
+
+def ansi_color(s: str, color: str) -> str:
+    """Return s with a color encoded in ANSI escape sequences"""
+    if not sys.stdout.isatty():
+        return s
+    colors = {'black': '30', 'red': '31', 'green': '32', 'yellow': '33',
+            'blue': '34', 'magenta': '35', 'cyan': '36', 'white': '37'}
+    if color in colors:
+        csi = '\033['
+        return ''.join([csi, colors[color], 'm', s, csi, '0m'])
+    else:
+        return s
+
+
+
+def date_to_week(date: datetime.date) -> List[datetime.date]:
+    """Get all the dates of the week the supplied date is part of"""
+    week_start = date - datetime.timedelta(date.weekday())
+    offsets = range(0, 7)
+    return [week_start + datetime.timedelta(x) for x in offsets]
+
+
+
+def str_to_date(s: str) -> Union[datetime.date, None]:
+    """Convert a string in the format YYYYMMDD to a datetime.date"""
+    if s.isdigit() and len(s) == 8:
+        year = int(s[0:4])
+        month = int(s[4:6])
+        day = int(s[6:8])
+        try:
+            return datetime.date(year, month, day)
+        except ValueError:
+            return None
+    else:
+        return None
+
+
+
+def last_date() -> List[datetime.date]:
+    """Find the date of the latest journal that is not today's journal"""
+    # Get the filenames of all journal files and remove the extensions
+    _, _, filenames = next(os.walk(journal_dir()))
+    filenames = [x[:-3] for x in filenames if x.endswith('.md')]
+    # Remove today's journal filename if it exists
+    today_str = datetime.date.today().strftime(_date_format_file)
+    if today_str in filenames:
+        filenames.remove(today_str)
+    # Return the latest day
+    filenames.sort()
+    if filenames:
+        return [str_to_date(filenames[-1])]
+    else:
+        return []
+
+
+
+def program_name_to_date_range() -> List[datetime.date]:
+    """Create a list of dates based on the program name"""
+    name = os.path.basename(sys.argv[0])
+    today = datetime.date.today()
+    if name == 'yesterday':
+        return [today - datetime.timedelta(1)]
+    elif name == 'tomorrow':
+        return [today + datetime.timedelta(1)]
+    elif name == 'lastday':
+        return last_date()
+    elif name == 'week':
+        return date_to_week(today)
+    elif name == 'lastweek':
+        return date_to_week(today - datetime.timedelta(7))
+    elif name == 'nextweek':
+        return date_to_week(today + datetime.timedelta(7))
+    else:
+        return [today]
+
+
+
+def dates_to_files(dates: List[datetime.date]) -> List[str]:
+    """Convert a list of dates to journal filenames"""
+    files = []
+    dir = journal_dir()
+    for date in dates:
+        files.append(dir + '/' + date.strftime(_date_format_file) + '.md')
+    return files
+
+
+
+def files_to_dates(files: List[str]) -> List[datetime.date]:
+    """Extract the dates from a list of filenames"""
+    dates = []
+    for file in files:
+        if len(file) >= 11:
+            date = str_to_date(file[-11:-3])
+            if date is not None:
+                dates.append(date)
+    return dates
+
+
+
+def todo_style(header: str) -> str:
+    return ansi_color(ansi_style(header, 'bold'), 'red')
+
+
+
+def header_style(header: str) -> str:
+    return ansi_color(ansi_style(header, 'bold'), 'blue')
+
+
+
+def day_header_style(day_header: str) -> str:
+    return ansi_style(ansi_color(day_header, 'yellow'), 'bold')
+
+
+
+def text_header_style(text_header: str) -> str:
+    return ansi_style(text_header, 'bold')
+
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description='Keep a daily journal in '
+    'Markdown. Journals are stored in the TODAYDIR environment variable or in '
+    '~/.local/share/today if it\'s unset. Journal filenames are formatted as '
+    'YYYYMMDD.md. Journals are opened using the editor defined in the VISUAL '
+    'or EDITOR environment variables. The journal to be opened depends on the '
+    'program name. Program names recognized are: today, yesterday, tomorrow, '
+    'week and ' 'lastweek.')
+    parser.add_argument('filenames', metavar='FILE', nargs='*',
+            help='open FILE instead of the journal for a specific date')
+    parser.add_argument('-d', '--date', metavar='YYYYMMDD',
+            help='show the journal for YYYYMMDD instead of the date inferred '
+            'from the program name')
+    parser.add_argument('-r', '--render', action='store_true',
+            help='render the journal instead of opening it for editing')
+    args = parser.parse_args()
+    # Post-process arguments
+    if args.filenames:
+        # Extract the dates from the filenames
+        args.dates = files_to_dates(args.filenames)
+    else:
+        # No journal file was supplied, look for the dates to use
+        if args.date:
+            # A date was given as an argument, use it
+            args.dates = [str_to_date(args.date)]
+            if args.dates[0] is None:
+                printerr('Invalid date format, expected YYYYMMDD')
+                sys.exit(2)
+        else:
+            # Compute the dates to use based on the program name
+            args.dates = program_name_to_date_range()
+        # Extract the filenames from the dates
+        args.filenames = dates_to_files(args.dates)
+    return args
+
+
+
+def show_dates(args: argparse.Namespace) -> None:
+    """Show all the journals for the supplied dates in the user's preferred pager"""
+    # Write to the stdin of the pager directly
+    with subprocess.Popen([pager(), '-R'], stdin=subprocess.PIPE, universal_newlines=True) as p:
+        # Create a header with the date range if applicable
+        if len(args.dates) > 1:
+            start_date = args.dates[0].strftime(_date_format_pretty)
+            end_date = args.dates[-1].strftime(_date_format_pretty)
+            header = ''.join([start_date, ' - ', end_date, '\n\n'])
+            header = header_style(header)
+            p.stdin.write(header)
+        # Loop over each day and output the contents of the respective file if
+        # it exists
+        for idx, day in enumerate(args.dates):
+            filename = args.filenames[idx]
+            if os.path.exists(filename):
+                with open(filename) as f:
+                    day_header = ''.join([day.strftime(_date_format_pretty), '\n\n'])
+                    day_header = day_header_style(day_header)
+                    p.stdin.write(day_header)
+                    for line in f:
+                        if 'TODO' in line:
+                            line = todo_style(line)
+                        elif line[0] == '#':
+                            line = text_header_style(line)
+                        p.stdin.write(line)
+                    p.stdin.write('\n\n')
+
+
+
+def edit_date(args: argparse.Namespace) -> None:
+    """Open the journal for a single date in the user's preferred text editor"""
+    # Create the journal directory
+    Path(journal_dir()).mkdir(parents=True, exist_ok=True)
+    filename = args.filenames[0]
+    result = subprocess.run([editor(), filename], stderr=subprocess.PIPE)
+    if result.returncode != 0:
+        printerr('subprocess error')
+        if result.stdout:
+            print(result.stdout, file=sys.stderr)
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    if args.render or (args.render and len(args.dates) > 0):
+        show_dates(args)
+    else:
+        edit_date(args)
+
