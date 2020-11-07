@@ -3,9 +3,10 @@
 # SPDX-FileCopyrightText: 2020 Sotiris Papatheodorou
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# TODO Create a separate command line parser for each mode (today,edit,render), remove the render option
+# TODO Add carry-todo option only for today
+# TODO Accept a date range instead of FILE
 # TODO In show_dates() mode, print markdown if stdout is redirected/piped
-# TODO Allow editing whole week and spliting the results into the dates
-# TODO Allow setting a custom suffix, how to handle pretty render?
 
 import argparse
 import datetime
@@ -20,7 +21,7 @@ from typing import List, Union
 
 
 _date_format_file = '%Y%m%d'
-_date_format_pretty = '%Y/%m/%d'
+_date_format_pretty = '%Y/%m/%d %A'
 
 
 
