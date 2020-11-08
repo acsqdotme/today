@@ -15,13 +15,13 @@ today - keep a daily journal
 .P
 .SH SYNOPSIS
 .P
-\fBtoday\fR     [\fIOPTION\fR].\&.\&.\&
+\fBtoday\fR     [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
 .br
-\fByesterday\fR [\fIOPTION\fR].\&.\&.\&
+\fByesterday\fR [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
 .br
-\fBtomorrow\fR  [\fIOPTION\fR].\&.\&.\&
+\fBtomorrow\fR  [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
 .br
-\fBlastday\fR   [\fIOPTION\fR].\&.\&.\&
+\fBlastday\fR   [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
 .br
 \fBweek\fR      [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
 .br
@@ -40,12 +40,17 @@ initial motivation was to create an easy to use daily work journal.\&
 \fBtoday\fR/\fByesterday\fR/\fBtomorrow\fR opens a Markdown file YYYYMMDD.\&md with
 today's/yesterday's/tomorrow's date using \fIVISUAL\fR.\&
 .P
-\fBlastday\fR opens the most recent journal file excluding today's file
-using \fIVISUAL\fR.\&
+\fBlastday\fR opens the most recent journal file excluding today's file using
+\fIVISUAL\fR.\&
 .P
-\fBweek\fR/\fBlastweek\fR/\fBnextweek\fR renders all the journal files for
-this/the last/the next week using \fIPAGER\fR.\& If \fIFILE\fR is provided render that
-instead of the files inferred from the program name.\&
+\fBweek\fR/\fBlastweek\fR/\fBnextweek\fR renders all the journal files for this/the last/the
+next week using \fIPAGER\fR.\&
+.P
+If a date in the \fIYYYYMMDD\fR format is provided, that date is used instead of the
+one inferred from the program name.\&
+.P
+If a \fIFILE\fR is provided, that file is rendered instead of the files inferred
+from the program name.\&
 .P
 The journal files are stored in the first directory among \fI$TODAYDIR\fR,
 \fI$XDG_DATA_HOME/today\fR and \fI$HOME/.\&local/share/today\fR that exists.\&
@@ -61,21 +66,6 @@ Show the program help.\&
 .P
 .P
 .RE
-.SH EDIT OPTIONS
-.P
-These options apply to \fBtoday\fR, \fByesterday\fR, \fBtomorrow\fR and \fBlastday\fR.\&
-.P
-\fB-d, --date\fR=\fIYYYYMMDD\fR
-.RS 4
-Edit the journal for YYYYMMDD instead of the date inferred from the program
-name.\&
-.P
-.RE
-Mandatory or optional arguments to long options are also mandatory or optional
-for any corresponding short options.\&
-.P
-.P
-.P
 .SH ENVIRONMENT VARIABLES
 .P
 \fITODAYDIR\fR
