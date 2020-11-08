@@ -3,11 +3,9 @@
 # SPDX-FileCopyrightText: 2020 Sotiris Papatheodorou
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# TODO Add custom suffix, remove markdown specific styles
-# TODO In show_dates() mode, print markdown if stdout is redirected/piped
-# TODO Add version number
 # TODO Add carry-todo option only for today
 # TODO Accept a date range instead of FILE
+# TODO Add version number
 
 import argparse
 import datetime
@@ -126,11 +124,11 @@ def str_to_date(s: str) -> Union[datetime.date, None]:
 
 
 
-def last_date() -> List[datetime.date]:
+def last_date(suffix: str) -> List[datetime.date]:
     """Find the date of the latest journal that is not today's journal"""
     # Get the filenames of all journal files and remove the extensions
     _, _, filenames = next(os.walk(journal_dir()))
-    filenames = [x[:-3] for x in filenames if x.endswith('.md')]
+    filenames = [x[:-3] for x in filenames if x.endswith(suffix)]
     # Remove today's journal filename if it exists
     today_str = datetime.date.today().strftime(_date_format_file)
     if today_str in filenames:
@@ -165,22 +163,22 @@ def program_name_to_date_range() -> List[datetime.date]:
 
 
 
-def dates_to_files(dates: List[datetime.date]) -> List[str]:
+def dates_to_files(dates: List[datetime.date], suffix: str) -> List[str]:
     """Convert a list of dates to journal filenames"""
     files = []
     dir = journal_dir()
     for date in dates:
-        files.append(dir + '/' + date.strftime(_date_format_file) + '.md')
+        files.append(dir + '/' + date.strftime(_date_format_file) + suffix)
     return files
 
 
 
-def files_to_dates(files: List[str]) -> List[datetime.date]:
+def files_to_dates(files: List[str], suffix: str) -> List[datetime.date]:
     """Extract the dates from a list of filenames"""
     dates = []
     for file in files:
         if len(file) >= 11:
-            date = str_to_date(file[-11:-3])
+            date = str_to_date(file[-11:-len(suffix)])
             if date is not None:
                 dates.append(date)
     return dates
@@ -202,27 +200,24 @@ def day_header_style(day_header: str) -> str:
 
 
 
-def text_header_style(text_header: str) -> str:
-    return ansi_style(text_header, 'bold')
-
-
-
 def parse_args_show(name: str) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
             description=' '.join([_help_desc_common, _help_desc[name]]),
             epilog=_help_epilog)
     parser.add_argument('filenames', metavar='FILE', nargs='*',
             help='open FILE instead of the journal for a specific date')
+    parser.add_argument('-s', '--suffix', metavar='SUFFIX', default='.md',
+            help='change the journal file suffix from .md to SUFFIX.')
     args = parser.parse_args()
     # Post-process arguments
     if args.filenames:
         # Extract the dates from the supplied filenames
-        args.dates = files_to_dates(args.filenames)
+        args.dates = files_to_dates(args.filenames, args.suffix)
     else:
         # Compute the dates to use based on the program name
         args.dates = program_name_to_date_range()
         # Extract the filenames from the dates
-        args.filenames = dates_to_files(args.dates)
+        args.filenames = dates_to_files(args.dates, args.suffix)
     return args
 
 
@@ -231,9 +226,11 @@ def parse_args_edit(name: str) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
             description=' '.join([_help_desc_common, _help_desc[name]]),
             epilog=_help_epilog)
-    parser.add_argument('date', metavar='YYYYMMDD',
+    parser.add_argument('date', metavar='YYYYMMDD', nargs='?',
             help='edit the journal for YYYYMMDD instead of the date inferred '
             'from the program name')
+    parser.add_argument('-s', '--suffix', metavar='SUFFIX', default='.md',
+            help='change the journal file suffix from .md to SUFFIX.')
     args = parser.parse_args()
     # Post-process arguments
     if args.date is not None:
@@ -246,7 +243,7 @@ def parse_args_edit(name: str) -> argparse.Namespace:
         # Compute the dates to use based on the program name
         args.dates = program_name_to_date_range()
     # Extract the filenames from the dates
-    args.filenames = dates_to_files(args.dates)
+    args.filenames = dates_to_files(args.dates, args.suffix)
     return args
 
 
@@ -274,8 +271,6 @@ def show_dates(args: argparse.Namespace) -> None:
                     for line in f:
                         if 'TODO' in line:
                             line = todo_style(line)
-                        elif line[0] == '#':
-                            line = text_header_style(line)
                         p.stdin.write(line)
                     p.stdin.write('\n\n')
 

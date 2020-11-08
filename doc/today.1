@@ -34,10 +34,10 @@ today - keep a daily journal
 .SH DESCRIPTION
 .P
 \fBtoday\fR is a Python 3 script that makes it easier to keep a daily journal.\& It
-creates a Markdown file for each day and opens it in your favorite editor.\& The
-initial motivation was to create an easy to use daily work journal.\&
+creates a file for each day and opens it in your favorite editor.\& The initial
+motivation was to create an easy to use daily work journal.\&
 .P
-\fBtoday\fR/\fByesterday\fR/\fBtomorrow\fR opens a Markdown file YYYYMMDD.\&md with
+\fBtoday\fR/\fByesterday\fR/\fBtomorrow\fR opens file YYYYMMDD.\&md with
 today's/yesterday's/tomorrow's date using \fIVISUAL\fR.\&
 .P
 \fBlastday\fR opens the most recent journal file excluding today's file using
@@ -57,8 +57,13 @@ The journal files are stored in the first directory among \fI$TODAYDIR\fR,
 .P
 .P
 .P
-.SH COMMON OPTIONS
+.SH OPTIONS
 .P
+\fB-s, --suffix\fR=\fISUFFIX\fR
+.RS 4
+Change the journal file suffix from \fB.\&md\fR to \fISUFFIX\fR.\&
+.P
+.RE
 \fB-h, --help\fR
 .RS 4
 Show the program help.\&
