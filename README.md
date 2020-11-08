@@ -34,7 +34,7 @@ lastweek  # Pretty print last week's journals
 nextweek  # Pretty print next week's journals
 ```
 
-Run `man today` or `today --help` for more detailed information.
+Run `man today` for more detailed information.
 
 
 

@@ -3,10 +3,12 @@
 # SPDX-FileCopyrightText: 2020 Sotiris Papatheodorou
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# TODO Create a separate command line parser for each mode (today,edit,render), remove the render option
+# TODO --date can become positional arg
+# TODO Add custom suffix, remove markdown specific styles
+# TODO In show_dates() mode, print markdown if stdout is redirected/piped
+# TODO Add version number
 # TODO Add carry-todo option only for today
 # TODO Accept a date range instead of FILE
-# TODO In show_dates() mode, print markdown if stdout is redirected/piped
 
 import argparse
 import datetime
@@ -22,6 +24,17 @@ from typing import List, Union
 
 _date_format_file = '%Y%m%d'
 _date_format_pretty = '%Y/%m/%d %A'
+_help_desc_common = 'Keep a daily journal.'
+_help_desc = {'today': "Edit today's journal file using VISUAL.",
+    'yesterday': "Edit yesterday's journal file using VISUAL.",
+    'tomorrow': "Edit tomorrow's journal file using VISUAL.",
+    'lastday': "Edit the most recent journal file excluding today's file using VISUAL.",
+    'week': "Render all the journal files for this week using PAGER.",
+    'lastweek': "Render all the journal files for last week using PAGER.",
+    'nextweek': "Render all the journal files for next week using PAGER."}
+_help_epilog = '''The journal files are stored in the first directory
+among $TODAYDIR, $XDG_DATA_HOME/today and $HOME/.local/share/today that
+exists.'''
 
 
 
@@ -195,39 +208,46 @@ def text_header_style(text_header: str) -> str:
 
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Keep a daily journal in '
-    'Markdown. Journals are stored in the TODAYDIR environment variable or in '
-    '~/.local/share/today if it\'s unset. Journal filenames are formatted as '
-    'YYYYMMDD.md. Journals are opened using the editor defined in the VISUAL '
-    'or EDITOR environment variables. The journal to be opened depends on the '
-    'program name. Program names recognized are: today, yesterday, tomorrow, '
-    'week and ' 'lastweek.')
+def parse_args_show(name: str) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+            description=' '.join([_help_desc_common, _help_desc[name]]),
+            epilog=_help_epilog)
     parser.add_argument('filenames', metavar='FILE', nargs='*',
             help='open FILE instead of the journal for a specific date')
-    parser.add_argument('-d', '--date', metavar='YYYYMMDD',
-            help='show the journal for YYYYMMDD instead of the date inferred '
-            'from the program name')
-    parser.add_argument('-r', '--render', action='store_true',
-            help='render the journal instead of opening it for editing')
     args = parser.parse_args()
     # Post-process arguments
     if args.filenames:
-        # Extract the dates from the filenames
+        # Extract the dates from the supplied filenames
         args.dates = files_to_dates(args.filenames)
     else:
-        # No journal file was supplied, look for the dates to use
-        if args.date:
-            # A date was given as an argument, use it
-            args.dates = [str_to_date(args.date)]
-            if args.dates[0] is None:
-                printerr('Invalid date format, expected YYYYMMDD')
-                sys.exit(2)
-        else:
-            # Compute the dates to use based on the program name
-            args.dates = program_name_to_date_range()
+        # Compute the dates to use based on the program name
+        args.dates = program_name_to_date_range()
         # Extract the filenames from the dates
         args.filenames = dates_to_files(args.dates)
+    return args
+
+
+
+def parse_args_edit(name: str) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+            description=' '.join([_help_desc_common, _help_desc[name]]),
+            epilog=_help_epilog)
+    parser.add_argument('-d', '--date', metavar='YYYYMMDD',
+            help='edit the journal for YYYYMMDD instead of the date inferred '
+            'from the program name')
+    args = parser.parse_args()
+    # Post-process arguments
+    if args.date:
+        # A date was given as an argument, use it
+        args.dates = [str_to_date(args.date)]
+        if args.dates[0] is None:
+            printerr('Invalid date format, expected YYYYMMDD')
+            sys.exit(2)
+    else:
+        # Compute the dates to use based on the program name
+        args.dates = program_name_to_date_range()
+    # Extract the filenames from the dates
+    args.filenames = dates_to_files(args.dates)
     return args
 
 
@@ -278,9 +298,11 @@ def edit_date(args: argparse.Namespace) -> None:
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    if args.render or (not args.render and len(args.dates) > 1):
+    name = os.path.basename(sys.argv[0])
+    if name in ['week', 'lastweek', 'nextweek']:
+        args = parse_args_show(name)
         show_dates(args)
     else:
+        args = parse_args_edit(name)
         edit_date(args)
 

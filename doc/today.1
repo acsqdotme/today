@@ -5,7 +5,7 @@
 .nh
 .ad l
 .\" Begin generated content:
-.TH "today" "1" "2020-11-07" "today 1.0.0"
+.TH "today" "1" "2020-11-08" "today 1.0.0"
 .P
 .SH NAME
 .P
@@ -15,13 +15,13 @@ today - keep a daily journal
 .P
 .SH SYNOPSIS
 .P
-\fBtoday\fR     [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
+\fBtoday\fR     [\fIOPTION\fR].\&.\&.\&
 .br
-\fByesterday\fR [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
+\fByesterday\fR [\fIOPTION\fR].\&.\&.\&
 .br
-\fBtomorrow\fR  [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
+\fBtomorrow\fR  [\fIOPTION\fR].\&.\&.\&
 .br
-\fBlastday\fR   [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
+\fBlastday\fR   [\fIOPTION\fR].\&.\&.\&
 .br
 \fBweek\fR      [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
 .br
@@ -44,31 +44,31 @@ today's/yesterday's/tomorrow's date using \fIVISUAL\fR.\&
 using \fIVISUAL\fR.\&
 .P
 \fBweek\fR/\fBlastweek\fR/\fBnextweek\fR renders all the journal files for
-this/the last/the next week using \fIPAGER\fR.\&
-.P
-When \fIFILES\fR are provided they are always rendered instead of edited.\&
+this/the last/the next week using \fIPAGER\fR.\& If \fIFILE\fR is provided render that
+instead of the files inferred from the program name.\&
 .P
 The journal files are stored in the first directory among \fI$TODAYDIR\fR,
 \fI$XDG_DATA_HOME/today\fR and \fI$HOME/.\&local/share/today\fR that exists.\&
 .P
 .P
 .P
-.SH OPTIONS
+.SH COMMON OPTIONS
 .P
-\fB-d, --date\fR=\fIYYYYMMDD\fR
-.RS 4
-Use the journal for YYYYMMDD instead of the date inferred from the program
-name.\&
-.P
-.RE
-\fB-r, --render\fR
-.RS 4
-Render the journal instead of opening it for editing.\&
-.P
-.RE
 \fB-h, --help\fR
 .RS 4
 Show the program help.\&
+.P
+.P
+.P
+.RE
+.SH EDIT OPTIONS
+.P
+These options apply to \fBtoday\fR, \fByesterday\fR, \fBtomorrow\fR and \fBlastday\fR.\&
+.P
+\fB-d, --date\fR=\fIYYYYMMDD\fR
+.RS 4
+Edit the journal for YYYYMMDD instead of the date inferred from the program
+name.\&
 .P
 .RE
 Mandatory or optional arguments to long options are also mandatory or optional

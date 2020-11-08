@@ -8,10 +8,10 @@ today - keep a daily journal
 
 # SYNOPSIS
 
-*today*     [_OPTION_]... [_FILE_]...++
-*yesterday* [_OPTION_]... [_FILE_]...++
-*tomorrow*  [_OPTION_]... [_FILE_]...++
-*lastday*   [_OPTION_]... [_FILE_]...++
+*today*     [_OPTION_]...++
+*yesterday* [_OPTION_]...++
+*tomorrow*  [_OPTION_]...++
+*lastday*   [_OPTION_]...++
 *week*      [_OPTION_]... [_FILE_]...++
 *lastweek*  [_OPTION_]... [_FILE_]...++
 *nextweek*  [_OPTION_]... [_FILE_]...
@@ -31,26 +31,28 @@ today's/yesterday's/tomorrow's date using _VISUAL_.
 using _VISUAL_.
 
 *week*/*lastweek*/*nextweek* renders all the journal files for
-this/the last/the next week using _PAGER_.
-
-When _FILES_ are provided they are always rendered instead of edited.
+this/the last/the next week using _PAGER_. If _FILE_ is provided render that
+instead of the files inferred from the program name.
 
 The journal files are stored in the first directory among _$TODAYDIR_,
 _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 
 
 
-# OPTIONS
-
-*-d, --date*=_YYYYMMDD_
-	Use the journal for YYYYMMDD instead of the date inferred from the program
-	name.
-
-*-r, --render*
-	Render the journal instead of opening it for editing.
+# COMMON OPTIONS
 
 *-h, --help*
 	Show the program help.
+
+
+
+# EDIT OPTIONS
+
+These options apply to *today*, *yesterday*, *tomorrow* and *lastday*.
+
+*-d, --date*=_YYYYMMDD_
+	Edit the journal for YYYYMMDD instead of the date inferred from the program
+	name.
 
 Mandatory or optional arguments to long options are also mandatory or optional
 for any corresponding short options.
