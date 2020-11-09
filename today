@@ -142,7 +142,7 @@ def last_date(suffix: str) -> List[datetime.date]:
 
 
 
-def program_name_to_date_range() -> List[datetime.date]:
+def program_name_to_date_range(suffix: str) -> List[datetime.date]:
     """Create a list of dates based on the program name"""
     name = os.path.basename(sys.argv[0])
     today = datetime.date.today()
@@ -151,7 +151,7 @@ def program_name_to_date_range() -> List[datetime.date]:
     elif name == 'tomorrow':
         return [today + datetime.timedelta(1)]
     elif name == 'lastday':
-        return last_date()
+        return last_date(suffix)
     elif name == 'week':
         return date_to_week(today)
     elif name == 'lastweek':
@@ -215,7 +215,7 @@ def parse_args_show(name: str) -> argparse.Namespace:
         args.dates = files_to_dates(args.filenames, args.suffix)
     else:
         # Compute the dates to use based on the program name
-        args.dates = program_name_to_date_range()
+        args.dates = program_name_to_date_range(args.suffix)
         # Extract the filenames from the dates
         args.filenames = dates_to_files(args.dates, args.suffix)
     return args
@@ -241,7 +241,7 @@ def parse_args_edit(name: str) -> argparse.Namespace:
             sys.exit(2)
     else:
         # Compute the dates to use based on the program name
-        args.dates = program_name_to_date_range()
+        args.dates = program_name_to_date_range(args.suffix)
     # Extract the filenames from the dates
     args.filenames = dates_to_files(args.dates, args.suffix)
     return args
