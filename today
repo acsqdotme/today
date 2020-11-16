@@ -73,31 +73,18 @@ def printerr(*args, **kwargs) -> None:
 
 
 
-def ansi_style(s: str, style: str) -> str:
-    """Return s with a style encoded in ANSI escape sequences"""
+def ansi(style: str) -> str:
+    """Return the corresponding ANSI escape sequence"""
     if not sys.stdout.isatty():
-        return s
-    styles = {'normal': '0', 'bold': '1', 'dim': '2', 'italic': '3',
-            'underline': '4', 'blink': '5', 'reverse': '7', 'crossout': '9'}
-    if style in styles:
-        csi = '\033['
-        return ''.join([csi, styles[style], 'm', s, csi, '0m'])
-    else:
-        return s
-
-
-
-def ansi_color(s: str, color: str) -> str:
-    """Return s with a color encoded in ANSI escape sequences"""
-    if not sys.stdout.isatty():
-        return s
-    colors = {'black': '30', 'red': '31', 'green': '32', 'yellow': '33',
+        return ''
+    to_seq = {'normal': '0', 'bold': '1', 'dim': '2', 'italic': '3',
+            'underline': '4', 'blink': '5', 'reverse': '7', 'crossout': '9',
+            'black': '30', 'red': '31', 'green': '32', 'yellow': '33',
             'blue': '34', 'magenta': '35', 'cyan': '36', 'white': '37'}
-    if color in colors:
-        csi = '\033['
-        return ''.join([csi, colors[color], 'm', s, csi, '0m'])
+    if style in to_seq:
+        return ''.join(['\033[', to_seq[style], 'm'])
     else:
-        return s
+        return ''
 
 
 
@@ -185,18 +172,18 @@ def files_to_dates(files: List[str], suffix: str) -> List[datetime.date]:
 
 
 
-def todo_style(header: str) -> str:
-    return ansi_color(ansi_style(header, 'bold'), 'red')
+def todo_style(todo_header: str) -> str:
+    return ''.join([ansi('bold'), ansi('red'), todo_header, ansi('normal')])
 
 
 
 def header_style(header: str) -> str:
-    return ansi_color(ansi_style(header, 'bold'), 'blue')
+    return ''.join([ansi('bold'), ansi('blue'), header, ansi('normal')])
 
 
 
 def day_header_style(day_header: str) -> str:
-    return ansi_style(ansi_color(day_header, 'yellow'), 'bold')
+    return ''.join([ansi('bold'), ansi('yellow'), day_header, ansi('normal')])
 
 
 
