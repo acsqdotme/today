@@ -5,7 +5,7 @@
 .nh
 .ad l
 .\" Begin generated content:
-.TH "today" "1" "2020-11-08" "today 1.0.0"
+.TH "today" "1" "2020-11-16" "today 1.0.0"
 .P
 .SH NAME
 .P
@@ -51,6 +51,9 @@ one inferred from the program name.\&
 .P
 If a \fIFILE\fR is provided, that file is rendered instead of the files inferred
 from the program name.\&
+.P
+If a journal file is empty or contains only whitespace after being edited it
+will be deleted.\&
 .P
 The journal files are stored in the first directory among \fI$TODAYDIR\fR,
 \fI$XDG_DATA_HOME/today\fR and \fI$HOME/.\&local/share/today\fR that exists.\&

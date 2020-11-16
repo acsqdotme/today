@@ -39,6 +39,9 @@ one inferred from the program name.
 If a _FILE_ is provided, that file is rendered instead of the files inferred
 from the program name.
 
+If a journal file is empty or contains only whitespace after being edited it
+will be deleted.
+
 The journal files are stored in the first directory among _$TODAYDIR_,
 _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 
