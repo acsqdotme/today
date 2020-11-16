@@ -288,6 +288,14 @@ def edit_date(args: argparse.Namespace) -> None:
             print(result.stdout, file=sys.stderr)
         if result.stderr:
             print(result.stderr, file=sys.stderr)
+    # Delete the journal file if it's empty
+    remove = False
+    with open(filename) as f:
+        data = f.read().strip()
+        if not data:
+            remove = True
+    if remove:
+        os.remove(filename)
 
 
 
