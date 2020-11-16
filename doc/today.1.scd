@@ -52,6 +52,10 @@ _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 *-s, --suffix*=_SUFFIX_
 	Change the journal file suffix from *.md* to _SUFFIX_.
 
+*-s, --special-regex*=_REGEX_
+	Change the regular expression used to highlight special lines from *'^#+
+	TODO$'* to _REGEX_.
+
 *-h, --help*
 	Show the program help.
 

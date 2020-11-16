@@ -10,6 +10,7 @@
 import argparse
 import datetime
 import os
+import re
 import subprocess
 import sys
 
@@ -172,7 +173,7 @@ def files_to_dates(files: List[str], suffix: str) -> List[datetime.date]:
 
 
 
-def todo_style(todo_header: str) -> str:
+def special_style(todo_header: str) -> str:
     return ''.join([ansi('bold'), ansi('red'), todo_header, ansi('normal')])
 
 
@@ -187,14 +188,27 @@ def day_header_style(day_header: str) -> str:
 
 
 
+def add_common_args(parser) -> None:
+    parser.add_argument('-s', '--suffix', metavar='SUFFIX', default='.md',
+            help='change the journal file suffix from .md to SUFFIX.')
+    parser.add_argument('-S', '--special-regex', metavar='REGEX', default='^#+ TODO$',
+            help='change the regular expression used to highlight special '
+            'lines from \'^#+ TODO$\' to REGEX')
+
+
+
+def process_common_args(args: argparse.Namespace) -> None:
+    args.special_pattern = re.compile(args.special_regex)
+
+
+
 def parse_args_show(name: str) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
             description=' '.join([_help_desc_common, _help_desc[name]]),
             epilog=_help_epilog)
     parser.add_argument('filenames', metavar='FILE', nargs='*',
             help='open FILE instead of the journal for a specific date')
-    parser.add_argument('-s', '--suffix', metavar='SUFFIX', default='.md',
-            help='change the journal file suffix from .md to SUFFIX.')
+    add_common_args(parser)
     args = parser.parse_args()
     # Post-process arguments
     if args.filenames:
@@ -205,6 +219,7 @@ def parse_args_show(name: str) -> argparse.Namespace:
         args.dates = program_name_to_date_range(args.suffix)
         # Extract the filenames from the dates
         args.filenames = dates_to_files(args.dates, args.suffix)
+    process_common_args(args)
     return args
 
 
@@ -216,8 +231,7 @@ def parse_args_edit(name: str) -> argparse.Namespace:
     parser.add_argument('date', metavar='YYYYMMDD', nargs='?',
             help='edit the journal for YYYYMMDD instead of the date inferred '
             'from the program name')
-    parser.add_argument('-s', '--suffix', metavar='SUFFIX', default='.md',
-            help='change the journal file suffix from .md to SUFFIX.')
+    add_common_args(parser)
     args = parser.parse_args()
     # Post-process arguments
     if args.date is not None:
@@ -231,6 +245,7 @@ def parse_args_edit(name: str) -> argparse.Namespace:
         args.dates = program_name_to_date_range(args.suffix)
     # Extract the filenames from the dates
     args.filenames = dates_to_files(args.dates, args.suffix)
+    process_common_args(args)
     return args
 
 
@@ -256,8 +271,8 @@ def show_dates(args: argparse.Namespace) -> None:
                     day_header = day_header_style(day_header)
                     p.stdin.write(day_header)
                     for line in f:
-                        if 'TODO' in line:
-                            line = todo_style(line)
+                        if args.special_pattern.match(line) is not None:
+                            line = special_style(line)
                         p.stdin.write(line)
                     p.stdin.write('\n\n')
 
