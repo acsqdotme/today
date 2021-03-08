@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 Sotiris Papatheodorou
+# SPDX-FileCopyrightText: 2020-2021 Sotiris Papatheodorou
 # SPDX-License-Identifier: CC0-1.0
 
 PREFIX ?= /usr/local

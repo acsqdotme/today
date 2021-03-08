@@ -92,7 +92,7 @@ Bugs and patches can be submitted by email to
 
 # LICENSE
 
-Copyright © 2020 Sotiris Papatheodorou
+Copyright 2020-2021 Sotiris Papatheodorou
 
 This program is Free Software: You can use, study share and improve it at your
 will. Specifically you can redistribute and/or modify it under the terms of the
@@ -102,6 +102,6 @@ option) any later version.
 
 
 
-; SPDX-FileCopyrightText: 2020 Sotiris Papatheodorou
+; SPDX-FileCopyrightText: 2020-2021 Sotiris Papatheodorou
 ; SPDX-License-Identifier: GPL-3.0-or-later
 
