@@ -5,7 +5,6 @@
 
 # TODO Add carry-todo option only for today
 # TODO Accept a date range instead of FILE
-# TODO Add version number
 
 import argparse
 import datetime
@@ -20,6 +19,7 @@ from typing import List, Union
 
 
 
+_version = "1.0.0"
 _date_format_file = '%Y%m%d'
 _date_format_pretty = '%Y/%m/%d %A'
 _help_desc_common = 'Keep a daily journal.'
@@ -189,6 +189,8 @@ def day_header_style(day_header: str) -> str:
 
 
 def add_common_args(parser) -> None:
+    parser.add_argument('--version', action='version',
+            version='%(prog)s ' + _version)
     parser.add_argument('-s', '--suffix', metavar='SUFFIX', default='.md',
             help='change the journal file suffix from .md to SUFFIX.')
     parser.add_argument('-S', '--special-regex', metavar='REGEX', default='^#+ TODO$',
