@@ -52,7 +52,7 @@ _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 *-s, --suffix*=_SUFFIX_
 	Change the journal file suffix from *.md* to _SUFFIX_.
 
-*-s, --special-regex*=_REGEX_
+*-S, --special-regex*=_REGEX_
 	Change the regular expression used to highlight special lines from *'^#+
 	TODO$'* to _REGEX_.
 
@@ -72,8 +72,8 @@ _VISUAL_
 	The editor to use for journal files.
 
 _EDITOR_
-	The editor to use for journal files if _VISUAL_. *nano* is used if it is
-	unset.
+	The editor to use for journal files if _VISUAL_ is unset. *nano* is used if
+	it is unset.
 
 _PAGER_
 	The pager to use for displaying journal files. *less* is used if it is
