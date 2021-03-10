@@ -5,7 +5,7 @@
 .nh
 .ad l
 .\" Begin generated content:
-.TH "today" "1" "2021-03-08" "today 1.0.0"
+.TH "today" "1" "2021-03-28" "today 1.0.0"
 .P
 .SH NAME
 .P
@@ -62,6 +62,13 @@ The journal files are stored in the first directory among \fI$TODAYDIR\fR,
 .P
 .SH OPTIONS
 .P
+\fB-c, --carry-regex\fR=[REGEX]
+.RS 4
+Move all text between the line matching the REGEX and the end of the file
+inclusive from the \fIlastday\fR to the \fItoday\fR file.\& The default REGEX is
+\fB'^#+TODO$'\fR.\& This option is only available for \fItoday\fR.\&
+.P
+.RE
 \fB-s, --suffix\fR=\fISUFFIX\fR
 .RS 4
 Change the journal file suffix from \fB.\&md\fR to \fISUFFIX\fR.\&

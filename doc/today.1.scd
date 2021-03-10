@@ -49,6 +49,11 @@ _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 
 # OPTIONS
 
+*-c, --carry-regex*=[REGEX]
+	Move all text between the line matching the REGEX and the end of the file
+	inclusive from the _lastday_ to the _today_ file. The default REGEX is
+	*'^#+TODO$'*. This option is only available for _today_.
+
 *-s, --suffix*=_SUFFIX_
 	Change the journal file suffix from *.md* to _SUFFIX_.
 

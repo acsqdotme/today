@@ -3,7 +3,6 @@
 # SPDX-FileCopyrightText: 2020-2021 Sotiris Papatheodorou
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# TODO Add carry-todo option only for today
 # TODO Accept a date range instead of FILE
 
 import argparse
@@ -232,9 +231,19 @@ def parse_args_edit(name: str) -> argparse.Namespace:
     parser.add_argument('date', metavar='YYYYMMDD', nargs='?',
             help='edit the journal for YYYYMMDD instead of the date inferred '
             'from the program name')
+    if os.path.basename(sys.argv[0]) == 'today':
+        parser.add_argument('-c', '--carry-regex', metavar='REGEX', nargs='?',
+                const='^#+ TODO$', default=None,
+                help='move all text between the line matching the REGEX and '
+                'the end of the file inclusive from the "lastday" to the '
+                '"today" file. The default REGEX is \'^#+ TODO$\'')
     add_common_args(parser)
     args = parser.parse_args()
     # Post-process arguments
+    if os.path.basename(sys.argv[0]) == 'today' and args.carry_regex is not None:
+        args.carry_regex = re.compile(args.carry_regex)
+    else:
+        args.carry_regex = None
     if args.date is not None:
         # A date was given as an argument, use it
         args.dates = [str_to_date(args.date)]
@@ -248,6 +257,38 @@ def parse_args_edit(name: str) -> argparse.Namespace:
     args.filenames = dates_to_files(args.dates, args.suffix)
     process_common_args(args)
     return args
+
+
+
+def get_before_regex(filename: str, regex: re.Pattern) -> str:
+    """Return all lines of filename from the first line up to the last not
+    matching the regex.
+    """
+    lines = []
+    after_regex = False
+    with open(filename) as f:
+        for line in f:
+            if args.carry_regex.match(line) is not None:
+                after_regex = True
+            if not after_regex:
+                lines.append(line)
+    text = ''.join(lines)
+    # Keep only a single trailing newline
+    return text.rstrip() + '\n\n'
+
+
+
+def get_after_regex(filename: str, regex: re.Pattern) -> str:
+    """Return all lines of filename from the first line matching the regex."""
+    lines = []
+    after_regex = False
+    with open(filename) as f:
+        for line in f:
+            if args.carry_regex.match(line) is not None:
+                after_regex = True
+            if after_regex:
+                lines.append(line)
+    return ''.join(lines)
 
 
 
@@ -284,8 +325,17 @@ def edit_date(args: argparse.Namespace) -> None:
     # Create the journal directory
     Path(journal_dir()).mkdir(parents=True, exist_ok=True)
     filename = args.filenames[0]
+    # Carry over content from lastday
+    should_carry = args.carry_regex is not None
+    if should_carry:
+        lastday_filename = dates_to_files(last_date(args.suffix), args.suffix)[0]
+        carried_content = get_after_regex(lastday_filename, args.carry_regex)
+        # Add lastday's content to today's file
+        with open(filename, 'w') as f:
+            f.write(carried_content)
     result = subprocess.run([editor(), filename], stderr=subprocess.PIPE)
-    if result.returncode != 0:
+    success = result.returncode == 0
+    if not success:
         printerr('subprocess error')
         if result.stdout:
             print(result.stdout, file=sys.stderr)
@@ -300,6 +350,14 @@ def edit_date(args: argparse.Namespace) -> None:
                 remove = True
     if remove:
         os.remove(filename)
+    # Remove the carried content from the previous file only if the current
+    # file was saved succesfully and is non-empty
+    file_written = os.path.isfile(filename)
+    if success and file_written and should_carry:
+        lastday_filename = dates_to_files(last_date(args.suffix), args.suffix)[0]
+        left_content = get_before_regex(lastday_filename, args.carry_regex)
+        with open(lastday_filename, 'w') as f:
+            f.write(left_content)
 
 
 
