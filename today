@@ -116,15 +116,14 @@ def last_date(suffix: str) -> List[datetime.date]:
     """Find the date of the latest journal that is not today's journal"""
     # Get the filenames of all journal files and remove the extensions
     _, _, filenames = next(os.walk(journal_dir()))
-    filenames = [x[:-3] for x in filenames if x.endswith(suffix)]
-    # Remove today's journal filename if it exists
+    dates_str = [x[:-3] for x in filenames if x.endswith(suffix)]
+    # Remove all dates corresponding to today or in the future
     today_str = datetime.date.today().strftime(_date_format_file)
-    if today_str in filenames:
-        filenames.remove(today_str)
+    dates_str = [d for d in dates_str if d < today_str]
     # Return the latest day
-    filenames.sort()
-    if filenames:
-        return [str_to_date(filenames[-1])]
+    dates_str.sort()
+    if dates_str:
+        return [str_to_date(dates_str[-1])]
     else:
         return []
 
