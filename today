@@ -26,6 +26,7 @@ _help_desc = {'today': "Edit today's journal file using VISUAL.",
     'yesterday': "Edit yesterday's journal file using VISUAL.",
     'tomorrow': "Edit tomorrow's journal file using VISUAL.",
     'lastday': "Edit the most recent journal file excluding today's file using VISUAL.",
+    'nextday': "Edit the closest future journal file using VISUAL.",
     'week': "Render all the journal files for this week using PAGER.",
     'lastweek': "Render all the journal files for last week using PAGER.",
     'nextweek': "Render all the journal files for next week using PAGER."}
@@ -128,6 +129,23 @@ def last_date(suffix: str) -> List[datetime.date]:
 
 
 
+def next_date(suffix: str) -> List[datetime.date]:
+    """Find the date of the next journal that is not today's journal"""
+    # Get the filenames of all journal files and remove the extensions
+    _, _, filenames = next(os.walk(journal_dir()))
+    dates_str = [x[:-3] for x in filenames if x.endswith(suffix)]
+    # Remove all dates corresponding to today or in the past
+    today_str = datetime.date.today().strftime(_date_format_file)
+    dates_str = [d for d in dates_str if d > today_str]
+    # Return the oldest day
+    dates_str.sort()
+    if dates_str:
+        return [str_to_date(dates_str[0])]
+    else:
+        return []
+
+
+
 def program_name_to_date_range(suffix: str) -> List[datetime.date]:
     """Create a list of dates based on the program name"""
     name = os.path.basename(sys.argv[0])
@@ -138,6 +156,8 @@ def program_name_to_date_range(suffix: str) -> List[datetime.date]:
         return [today + datetime.timedelta(1)]
     elif name == 'lastday':
         return last_date(suffix)
+    elif name == 'nextday':
+        return next_date(suffix)
     elif name == 'week':
         return date_to_week(today)
     elif name == 'lastweek':

@@ -12,6 +12,7 @@ today - keep a daily journal
 *yesterday* [_OPTION_]... [_YYYYMMDD_]++
 *tomorrow*  [_OPTION_]... [_YYYYMMDD_]++
 *lastday*   [_OPTION_]... [_YYYYMMDD_]++
+*nextday*   [_OPTION_]... [_YYYYMMDD_]++
 *week*      [_OPTION_]... [_FILE_]...++
 *lastweek*  [_OPTION_]... [_FILE_]...++
 *nextweek*  [_OPTION_]... [_FILE_]...
@@ -29,6 +30,8 @@ today's/yesterday's/tomorrow's date using _VISUAL_.
 
 *lastday* opens the most recent journal file excluding today's file using
 _VISUAL_.
+
+*nextday* opens the closest future journal file using _VISUAL_.
 
 *week*/*lastweek*/*nextweek* renders all the journal files for this/the last/the
 next week using _PAGER_.
