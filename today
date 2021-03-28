@@ -322,6 +322,9 @@ def show_dates(args: argparse.Namespace) -> None:
 
 def edit_date(args: argparse.Namespace) -> None:
     """Open the journal for a single date in the user's preferred text editor"""
+    if not args.filenames:
+        printerr("No files to edit.")
+        sys.exit(1)
     # Create the journal directory
     Path(journal_dir()).mkdir(parents=True, exist_ok=True)
     filename = args.filenames[0]
