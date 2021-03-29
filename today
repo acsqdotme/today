@@ -292,9 +292,11 @@ def get_before_regex(filename: str, regex: re.Pattern) -> str:
                 after_regex = True
             if not after_regex:
                 lines.append(line)
-    text = ''.join(lines)
+    text = ''.join(lines).rstrip()
     # Keep only a single trailing newline
-    return text.rstrip() + '\n\n'
+    if text:
+        text += '\n\n'
+    return text
 
 
 
@@ -353,9 +355,14 @@ def edit_date(args: argparse.Namespace) -> None:
     if should_carry:
         lastday_filename = dates_to_files(last_date(args.suffix), args.suffix)[0]
         carried_content = get_after_regex(lastday_filename, args.carry_regex)
-        # Add lastday's content to today's file
-        with open(filename, 'w') as f:
+        # Append lastday's content to today's file
+        with open(filename, 'a') as f:
+            f.write('\n\n')
             f.write(carried_content)
+        # Remove the carried content from the previous file
+        left_content = get_before_regex(lastday_filename, args.carry_regex)
+        with open(lastday_filename, 'w') as f:
+            f.write(left_content)
     result = subprocess.run([editor(), filename], stderr=subprocess.PIPE)
     success = result.returncode == 0
     if not success:
@@ -373,14 +380,6 @@ def edit_date(args: argparse.Namespace) -> None:
                 remove = True
     if remove:
         os.remove(filename)
-    # Remove the carried content from the previous file only if the current
-    # file was saved succesfully and is non-empty
-    file_written = os.path.isfile(filename)
-    if success and file_written and should_carry:
-        lastday_filename = dates_to_files(last_date(args.suffix), args.suffix)[0]
-        left_content = get_before_regex(lastday_filename, args.carry_regex)
-        with open(lastday_filename, 'w') as f:
-            f.write(left_content)
 
 
 
