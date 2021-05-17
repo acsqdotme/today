@@ -11,9 +11,10 @@ motivation was to create an easy to use daily work journal.
 
 ## Usage
 
-`today` creates a journal file `YYYYMMDD.md` with the timestamp of the current
-day. The file is opened with `$VISUAL` or `$EDITOR` if the former is not
-defined. The journal files are stored in the first directory that exists among
+`today` creates a journal file `YYYYMMDD.md` named with the current date. The
+file is opened with `$VISUAL` or `$EDITOR` if the former is not defined. The
+journal files are stored in the first directory that exists among the
+following:
 
 ``` bash
 $TODAYDIR
@@ -34,7 +35,7 @@ lastweek  # Pretty print last week's journals
 nextweek  # Pretty print next week's journals
 ```
 
-Run `man today` for more detailed information.
+See the `today` manpage for more detailed information.
 
 
 
