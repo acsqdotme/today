@@ -5,7 +5,7 @@
 .nh
 .ad l
 .\" Begin generated content:
-.TH "today" "1" "2021-03-29" "today 1.1.1"
+.TH "today" "1" "2021-05-20" "today 1.1.2"
 .P
 .SH NAME
 .P
@@ -40,9 +40,9 @@ creates a file for each day and opens it in your favorite editor.\& The initial
 motivation was to create an easy to use daily work journal.\&
 .P
 \fBtoday\fR/\fByesterday\fR/\fBtomorrow\fR opens file YYYYMMDD.\&md with
-today's/yesterday's/tomorrow's date using \fIVISUAL\fR.\&
+today'\&s/yesterday'\&s/tomorrow'\&s date using \fIVISUAL\fR.\&
 .P
-\fBlastday\fR opens the most recent journal file excluding today's file using
+\fBlastday\fR opens the most recent journal file excluding today'\&s file using
 \fIVISUAL\fR.\&
 .P
 \fBnextday\fR opens the closest future journal file using \fIVISUAL\fR.\&
@@ -70,7 +70,7 @@ The journal files are stored in the first directory among \fI$TODAYDIR\fR,
 .RS 4
 Move all text between the line matching the REGEX and the end of the file
 inclusive from the \fIlastday\fR to the \fItoday\fR file.\& The default REGEX is
-\fB'^#+TODO$'\fR.\& This option is only available for \fItoday\fR.\&
+\fB'\&^#+TODO$'\&\fR.\& This option is only available for \fItoday\fR.\&
 .P
 .RE
 \fB-s, --suffix\fR=\fISUFFIX\fR
@@ -80,8 +80,8 @@ Change the journal file suffix from \fB.\&md\fR to \fISUFFIX\fR.\&
 .RE
 \fB-S, --special-regex\fR=\fIREGEX\fR
 .RS 4
-Change the regular expression used to highlight special lines from \fB'^#+
-TODO$'\fR to \fIREGEX\fR.\&
+Change the regular expression used to highlight special lines from \fB'\&^#+
+TODO$'\&\fR to \fIREGEX\fR.\&
 .P
 .RE
 \fB-h, --help\fR
