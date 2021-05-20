@@ -356,9 +356,10 @@ def edit_date(args: argparse.Namespace) -> None:
         lastday_filename = dates_to_files(last_date(args.suffix), args.suffix)[0]
         carried_content = get_after_regex(lastday_filename, args.carry_regex)
         # Append lastday's content to today's file
-        with open(filename, 'a') as f:
-            f.write('\n\n\n')
-            f.write(carried_content)
+        if carried_content:
+            with open(filename, 'a') as f:
+                f.write('\n\n\n')
+                f.write(carried_content)
         # Remove the carried content from the previous file
         left_content = get_before_regex(lastday_filename, args.carry_regex)
         with open(lastday_filename, 'w') as f:
