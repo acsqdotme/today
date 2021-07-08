@@ -67,6 +67,24 @@ def pager() -> str:
 
 
 
+def journal_suffix() -> str:
+    """Return the journal file suffix"""
+    if 'TODAY_SUFFIX' in os.environ:
+        return os.environ['TODAY_SUFFIX']
+    else:
+        return '.md'
+
+
+
+def special_regex() -> str:
+    """Return the regex used to highlight special lines"""
+    if 'TODAY_SPECIAL_REGEX' in os.environ:
+        return os.environ['TODAY_SPECIAL_REGEX']
+    else:
+        return '^#+ TODO$'
+
+
+
 def printerr(*args, **kwargs) -> None:
     """Print to stderr prefixed with the program name"""
     error_prefix = os.path.basename(sys.argv[0]) + ': error:'
@@ -209,16 +227,12 @@ def day_header_style(day_header: str) -> str:
 def add_common_args(parser) -> None:
     parser.add_argument('--version', action='version',
             version='%(prog)s ' + _version)
-    parser.add_argument('-s', '--suffix', metavar='SUFFIX', default='.md',
-            help='change the journal file suffix from .md to SUFFIX.')
-    parser.add_argument('-S', '--special-regex', metavar='REGEX', default='^#+ TODO$',
-            help='change the regular expression used to highlight special '
-            'lines from \'^#+ TODO$\' to REGEX')
 
 
 
 def process_common_args(args: argparse.Namespace) -> None:
-    args.special_pattern = re.compile(args.special_regex)
+    args.suffix = journal_suffix()
+    args.special_pattern = re.compile(special_regex())
 
 
 
@@ -231,6 +245,7 @@ def parse_args_show(name: str) -> argparse.Namespace:
     add_common_args(parser)
     args = parser.parse_args()
     # Post-process arguments
+    process_common_args(args)
     if args.filenames:
         # Extract the dates from the supplied filenames
         args.dates = files_to_dates(args.filenames, args.suffix)
@@ -239,7 +254,6 @@ def parse_args_show(name: str) -> argparse.Namespace:
         args.dates = program_name_to_date_range(args.suffix)
         # Extract the filenames from the dates
         args.filenames = dates_to_files(args.dates, args.suffix)
-    process_common_args(args)
     return args
 
 
@@ -260,6 +274,7 @@ def parse_args_edit(name: str) -> argparse.Namespace:
     add_common_args(parser)
     args = parser.parse_args()
     # Post-process arguments
+    process_common_args(args)
     if os.path.basename(sys.argv[0]) == 'today' and args.carry_regex is not None:
         args.carry_regex = re.compile(args.carry_regex)
     else:
@@ -275,7 +290,6 @@ def parse_args_edit(name: str) -> argparse.Namespace:
         args.dates = program_name_to_date_range(args.suffix)
     # Extract the filenames from the dates
     args.filenames = dates_to_files(args.dates, args.suffix)
-    process_common_args(args)
     return args
 
 

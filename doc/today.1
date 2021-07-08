@@ -70,18 +70,7 @@ The journal files are stored in the first directory among \fI$TODAYDIR\fR,
 .RS 4
 Move all text between the line matching the REGEX and the end of the file
 inclusive from the \fIprevday\fR to the \fItoday\fR file.\& The default REGEX is
-\fB'\&^#+TODO$'\&\fR.\& This option is only available for \fItoday\fR.\&
-.P
-.RE
-\fB-s, --suffix\fR=\fISUFFIX\fR
-.RS 4
-Change the journal file suffix from \fB.\&md\fR to \fISUFFIX\fR.\&
-.P
-.RE
-\fB-S, --special-regex\fR=\fIREGEX\fR
-.RS 4
-Change the regular expression used to highlight special lines from \fB'\&^#+
-TODO$'\&\fR to \fIREGEX\fR.\&
+\fB^#+TODO$\fR.\& This option is only available for \fItoday\fR.\&
 .P
 .RE
 \fB-h, --help\fR
@@ -98,6 +87,17 @@ Show the program help.\&
 Overrides the default journal storage directory.\& The first among
 \fI$XDG_DATA_HOME/today\fR and \fI$HOME/.\&local/share/today\fR that exists is used if
 it is unset.\&
+.P
+.RE
+\fITODAY_SUFFIX\fR
+.RS 4
+The journal file suffix.\& \fB.\&md\fR is used if it is unset.\&
+.P
+.RE
+\fITODAY_SPECIAL_REGEX\fR
+.RS 4
+The regular expression used to highlight special lines.\& \fB^#+ TODO$\fR is used
+if it is unset.\&
 .P
 .RE
 \fIVISUAL\fR

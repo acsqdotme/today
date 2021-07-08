@@ -55,14 +55,7 @@ _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 *-c, --carry-regex*=[REGEX]
 	Move all text between the line matching the REGEX and the end of the file
 	inclusive from the _prevday_ to the _today_ file. The default REGEX is
-	*'^#+TODO$'*. This option is only available for _today_.
-
-*-s, --suffix*=_SUFFIX_
-	Change the journal file suffix from *.md* to _SUFFIX_.
-
-*-S, --special-regex*=_REGEX_
-	Change the regular expression used to highlight special lines from *'^#+
-	TODO$'* to _REGEX_.
+	*^#+TODO$*. This option is only available for _today_.
 
 *-h, --help*
 	Show the program help.
@@ -75,6 +68,13 @@ _TODAYDIR_
 	Overrides the default journal storage directory. The first among
 	_$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists is used if
 	it is unset.
+
+_TODAY_SUFFIX_
+	The journal file suffix. *.md* is used if it is unset.
+
+_TODAY_SPECIAL_REGEX_
+	The regular expression used to highlight special lines. *^#+ TODO$* is used
+	if it is unset.
 
 _VISUAL_
 	The editor to use for journal files.
