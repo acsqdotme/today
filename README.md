@@ -33,6 +33,9 @@ prevday   # Edit the most recent journal excluding today's journal
 week      # Pretty print this week's journals
 prevweek  # Pretty print the previous week's journals
 nextweek  # Pretty print the next week's journals
+month     # Pretty print this month's journals
+prevmonth # Pretty print the previous month's journals
+nextmonth # Pretty print the next month's journals
 ```
 
 See the `today` manpage for more detailed information.

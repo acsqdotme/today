@@ -15,7 +15,10 @@ today - keep a daily journal
 *nextday*   [_OPTION_]...++
 *week*      [_OPTION_]...++
 *prevweek*  [_OPTION_]...++
-*nextweek*  [_OPTION_]...
+*nextweek*  [_OPTION_]...++
+*month*      [_OPTION_]...++
+*prevmonth*  [_OPTION_]...++
+*nextmonth*  [_OPTION_]...
 
 
 
@@ -38,6 +41,9 @@ _VISUAL_.
 
 *week*/*prevweek*/*nextweek* renders all the journal files for this/the
 previous/the next week using _PAGER_.
+
+*month*/*prevmonth*/*nextmonth* renders all the journal files for this/the
+previous/the next month using _PAGER_.
 
 If a journal file is empty or contains only whitespace after being edited it
 will be deleted.

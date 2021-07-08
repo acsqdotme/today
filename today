@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import argparse
+import calendar
 import datetime
 import os
 import re
@@ -27,7 +28,10 @@ _help_desc = {'today': "Edit today's journal file using VISUAL.",
     'nextday': "Edit the closest future journal file using VISUAL.",
     'week': "Render all the journal files for this week using PAGER.",
     'prevweek': "Render all the journal files for the previous week using PAGER.",
-    'nextweek': "Render all the journal files for the next week using PAGER."}
+    'nextweek': "Render all the journal files for the next week using PAGER.",
+    'month': "Render all the journal files for this month using PAGER.",
+    'prevmonth': "Render all the journal files for the previous month using PAGER.",
+    'nextmonth': "Render all the journal files for the next month using PAGER."}
 _help_epilog = '''The journal files are stored in the first directory
 among $TODAY_DIR, $XDG_DATA_HOME/today and $HOME/.local/share/today that
 exists.'''
@@ -105,11 +109,24 @@ def ansi(style: str) -> str:
 
 
 
+def days_in_month(year: int, month: int) -> int:
+    return calendar.monthrange(year, month)[1]
+
+
+
 def date_to_week(date: datetime.date) -> List[datetime.date]:
     """Get all the dates of the week the supplied date is part of"""
     week_start = date - datetime.timedelta(date.weekday())
     offsets = range(0, 7)
     return [week_start + datetime.timedelta(x) for x in offsets]
+
+
+
+def date_to_month(date: datetime.date) -> List[datetime.date]:
+    """Get all the dates of the month the supplied date is part of"""
+    month_start = date - datetime.timedelta(date.day - 1)
+    offsets = range(0, days_in_month(date.year, date.month))
+    return [month_start + datetime.timedelta(x) for x in offsets]
 
 
 
@@ -180,6 +197,12 @@ def program_name_to_date_range(suffix: str) -> List[datetime.date]:
         return date_to_week(today - datetime.timedelta(7))
     elif name == 'nextweek':
         return date_to_week(today + datetime.timedelta(7))
+    elif name == 'month':
+        return date_to_month(today)
+    elif name == 'prevmonth':
+        return date_to_month(today - datetime.timedelta(days_in_month(today.year, today.month)))
+    elif name == 'nextmonth':
+        return date_to_month(today + datetime.timedelta(days_in_month(today.year, today.month)))
     else:
         return [today]
 
@@ -509,7 +532,7 @@ if __name__ == "__main__":
             show_dates(args)
         else:
             edit_date(args)
-    elif name in ['week', 'prevweek', 'nextweek']:
+    elif name in ['week', 'prevweek', 'nextweek', 'month', 'prevmonth', 'nextmonth']:
         args = parse_args_common(name)
         show_dates(args)
     else:

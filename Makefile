@@ -8,9 +8,13 @@ MANDIR ?= $(_INSTDIR)/share/man
 
 .PHONY: all
 all:
-	ln -sf today prevday
-	ln -sf today prevweek
+	ln -sf today month
+	ln -sf today nextday
+	ln -sf today nextmonth
 	ln -sf today nextweek
+	ln -sf today prevday
+	ln -sf today prevmonth
+	ln -sf today prevweek
 	ln -sf today tomorrow
 	ln -sf today week
 	ln -sf today yesterday
@@ -27,10 +31,10 @@ doc: doc/today.1
 
 .PHONY: install
 install: all
-	install -D --target-directory $(BINDIR) prevday prevweek nextweek today tomorrow week yesterday
+	install -D --target-directory $(BINDIR) month nextday nextmonth nextweek prevday prevmonth prevweek tomorrow week yesterday
 	install -D -m 644 doc/today.1 $(MANDIR)/man1/today.1
 
 .PHONY: uninstall
 uninstall:
-	rm -f $(BINDIR)/prevday $(BINDIR)/prevweek $(BINDIR)/nextweek $(BINDIR)/today $(BINDIR)/tomorrow $(BINDIR)/week $(BINDIR)/yesterday $(MANDIR)/man1/today.1
+	rm -f $(BINDIR)/month $(BINDIR)/nextday $(BINDIR)/nextmonth $(BINDIR)/nextweek $(BINDIR)/prevday $(BINDIR)/prevmonth $(BINDIR)/prevweek $(BINDIR)/tomorrow $(BINDIR)/week $(BINDIR)/yesterday $(MANDIR)/man1/today.1
 
