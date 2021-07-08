@@ -17,7 +17,7 @@ journal files are stored in the first directory that exists among the
 following:
 
 ``` bash
-$TODAYDIR
+$TODAY_DIR
 $XDG_DATA_HOME/today
 $HOME/.local/share/today
 ```

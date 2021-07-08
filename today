@@ -31,15 +31,15 @@ _help_desc = {'today': "Edit today's journal file using VISUAL.",
     'prevweek': "Render all the journal files for the previous week using PAGER.",
     'nextweek': "Render all the journal files for the next week using PAGER."}
 _help_epilog = '''The journal files are stored in the first directory
-among $TODAYDIR, $XDG_DATA_HOME/today and $HOME/.local/share/today that
+among $TODAY_DIR, $XDG_DATA_HOME/today and $HOME/.local/share/today that
 exists.'''
 
 
 
 def journal_dir() -> str:
     """Return the journal directory"""
-    if 'TODAYDIR' in os.environ:
-        return os.environ['TODAYDIR']
+    if 'TODAY_DIR' in os.environ:
+        return os.environ['TODAY_DIR']
     elif 'XDG_DATA_HOME' in os.environ:
         return os.environ['XDG_DATA_HOME'] + '/today'
     else:

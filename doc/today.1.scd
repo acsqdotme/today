@@ -45,7 +45,7 @@ from the program name.
 If a journal file is empty or contains only whitespace after being edited it
 will be deleted.
 
-The journal files are stored in the first directory among _$TODAYDIR_,
+The journal files are stored in the first directory among _$TODAY_DIR_,
 _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 
 
@@ -67,7 +67,7 @@ _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 
 # ENVIRONMENT VARIABLES
 
-_TODAYDIR_
+_TODAY_DIR_
 	Overrides the default journal storage directory. The first among
 	_$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists is used if
 	it is unset.
