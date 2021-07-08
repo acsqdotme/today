@@ -209,18 +209,27 @@ def files_to_dates(files: List[str], suffix: str) -> List[datetime.date]:
 
 
 
-def special_style(todo_header: str) -> str:
-    return ''.join([ansi('bold'), ansi('red'), todo_header, ansi('normal')])
+def special_style(todo_header: str, in_terminal: bool) -> str:
+    if in_terminal:
+        return ''.join([ansi('bold'), ansi('red'), todo_header, ansi('normal')])
+    else:
+        return todo_header
 
 
 
-def header_style(header: str) -> str:
-    return ''.join([ansi('bold'), ansi('blue'), header, ansi('normal')])
+def header_style(header: str, in_terminal: bool) -> str:
+    if in_terminal:
+        return ''.join([ansi('bold'), ansi('blue'), header, ansi('normal')])
+    else:
+        return header
 
 
 
-def day_header_style(day_header: str) -> str:
-    return ''.join([ansi('bold'), ansi('yellow'), day_header, ansi('normal')])
+def day_header_style(day_header: str, in_terminal: bool) -> str:
+    if in_terminal:
+        return ''.join([ansi('bold'), ansi('yellow'), day_header, ansi('normal')])
+    else:
+        return day_header
 
 
 
@@ -231,6 +240,7 @@ def add_common_args(parser) -> None:
 
 
 def process_common_args(args: argparse.Namespace) -> None:
+    args.in_terminal = sys.stdout.isatty()
     args.suffix = journal_suffix()
     args.special_pattern = re.compile(special_regex())
 
@@ -337,7 +347,7 @@ def show_dates(args: argparse.Namespace) -> None:
             start_date = args.dates[0].strftime(_date_format_pretty)
             end_date = args.dates[-1].strftime(_date_format_pretty)
             header = ''.join([start_date, ' - ', end_date, '\n\n'])
-            header = header_style(header)
+            header = header_style(header, args.in_terminal)
             p.stdin.write(header)
         # Loop over each day and output the contents of the respective file if
         # it exists
@@ -346,11 +356,11 @@ def show_dates(args: argparse.Namespace) -> None:
             if os.path.exists(filename):
                 with open(filename) as f:
                     day_header = ''.join([day.strftime(_date_format_pretty), '\n\n'])
-                    day_header = day_header_style(day_header)
+                    day_header = day_header_style(day_header, args.in_terminal)
                     p.stdin.write(day_header)
                     for line in f:
                         if args.special_pattern.match(line) is not None:
-                            line = special_style(line)
+                            line = special_style(line, args.in_terminal)
                         p.stdin.write(line)
                     p.stdin.write('\n\n')
 
