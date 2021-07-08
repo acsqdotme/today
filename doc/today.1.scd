@@ -9,13 +9,13 @@ today - keep a daily journal
 # SYNOPSIS
 
 *today*     [_OPTION_]... [_YYYYMMDD_]++
-*yesterday* [_OPTION_]... [_YYYYMMDD_]++
-*tomorrow*  [_OPTION_]... [_YYYYMMDD_]++
-*prevday*   [_OPTION_]... [_YYYYMMDD_]++
-*nextday*   [_OPTION_]... [_YYYYMMDD_]++
-*week*      [_OPTION_]... [_FILE_]...++
-*prevweek*  [_OPTION_]... [_FILE_]...++
-*nextweek*  [_OPTION_]... [_FILE_]...
+*yesterday* [_OPTION_]...++
+*tomorrow*  [_OPTION_]...++
+*prevday*   [_OPTION_]...++
+*nextday*   [_OPTION_]...++
+*week*      [_OPTION_]...++
+*prevweek*  [_OPTION_]...++
+*nextweek*  [_OPTION_]...
 
 
 
@@ -28,6 +28,9 @@ motivation was to create an easy to use daily work journal.
 *today*/*yesterday*/*tomorrow* opens file YYYYMMDD.md with
 today's/yesterday's/tomorrow's date using _VISUAL_.
 
+*today* _YYYYMMDD_ opens the journal file for the specified day instead of
+today.
+
 *prevday* opens the most recent journal file excluding today's file using
 _VISUAL_.
 
@@ -35,12 +38,6 @@ _VISUAL_.
 
 *week*/*prevweek*/*nextweek* renders all the journal files for this/the
 previous/the next week using _PAGER_.
-
-If a date in the _YYYYMMDD_ format is provided, that date is used instead of the
-one inferred from the program name.
-
-If a _FILE_ is provided, that file is rendered instead of the files inferred
-from the program name.
 
 If a journal file is empty or contains only whitespace after being edited it
 will be deleted.
@@ -50,12 +47,16 @@ _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 
 
 
-# OPTIONS
+# TODAY OPTIONS
+
+The following options are only available for _today_.
 
 *-c, --carry-regex*=[REGEX]
 	Move all text between the line matching the REGEX and the end of the file
 	inclusive from the _prevday_ to the _today_ file. The default REGEX is
-	*^#+TODO$*. This option is only available for _today_.
+	*^#+TODO$*.
+
+# COMMON OPTIONS
 
 *-h, --help*
 	Show the program help.

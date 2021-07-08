@@ -240,35 +240,30 @@ def add_common_args(parser) -> None:
 
 
 def process_common_args(args: argparse.Namespace) -> None:
+    args.carry_regex = None
     args.in_terminal = sys.stdout.isatty()
     args.suffix = journal_suffix()
     args.special_pattern = re.compile(special_regex())
 
 
 
-def parse_args_show(name: str) -> argparse.Namespace:
+def parse_args_common(name: str) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
             description=' '.join([_help_desc_common, _help_desc[name]]),
             epilog=_help_epilog)
-    parser.add_argument('filenames', metavar='FILE', nargs='*',
-            help='open FILE instead of the journal for a specific date')
     add_common_args(parser)
     args = parser.parse_args()
     # Post-process arguments
     process_common_args(args)
-    if args.filenames:
-        # Extract the dates from the supplied filenames
-        args.dates = files_to_dates(args.filenames, args.suffix)
-    else:
-        # Compute the dates to use based on the program name
-        args.dates = program_name_to_date_range(args.suffix)
-        # Extract the filenames from the dates
-        args.filenames = dates_to_files(args.dates, args.suffix)
+    # Compute the dates to use based on the program name
+    args.dates = program_name_to_date_range(args.suffix)
+    # Extract the filenames from the dates
+    args.filenames = dates_to_files(args.dates, args.suffix)
     return args
 
 
 
-def parse_args_edit(name: str) -> argparse.Namespace:
+def parse_args_today(name: str) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
             description=' '.join([_help_desc_common, _help_desc[name]]),
             epilog=_help_epilog)
@@ -410,10 +405,13 @@ def edit_date(args: argparse.Namespace) -> None:
 
 if __name__ == "__main__":
     name = os.path.basename(sys.argv[0])
-    if name in ['week', 'prevweek', 'nextweek']:
-        args = parse_args_show(name)
+    if name == 'today':
+        args = parse_args_today(name)
+        edit_date(args)
+    elif name in ['week', 'prevweek', 'nextweek']:
+        args = parse_args_common(name)
         show_dates(args)
     else:
-        args = parse_args_edit(name)
+        args = parse_args_common(name)
         edit_date(args)
 

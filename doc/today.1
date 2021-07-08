@@ -17,19 +17,19 @@ today - keep a daily journal
 .P
 \fBtoday\fR     [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
 .br
-\fByesterday\fR [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
+\fByesterday\fR [\fIOPTION\fR].\&.\&.\&
 .br
-\fBtomorrow\fR  [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
+\fBtomorrow\fR  [\fIOPTION\fR].\&.\&.\&
 .br
-\fBprevday\fR   [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
+\fBprevday\fR   [\fIOPTION\fR].\&.\&.\&
 .br
-\fBnextday\fR   [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
+\fBnextday\fR   [\fIOPTION\fR].\&.\&.\&
 .br
-\fBweek\fR      [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
+\fBweek\fR      [\fIOPTION\fR].\&.\&.\&
 .br
-\fBprevweek\fR  [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
+\fBprevweek\fR  [\fIOPTION\fR].\&.\&.\&
 .br
-\fBnextweek\fR  [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
+\fBnextweek\fR  [\fIOPTION\fR].\&.\&.\&
 .P
 .P
 .P
@@ -42,6 +42,9 @@ motivation was to create an easy to use daily work journal.\&
 \fBtoday\fR/\fByesterday\fR/\fBtomorrow\fR opens file YYYYMMDD.\&md with
 today'\&s/yesterday'\&s/tomorrow'\&s date using \fIVISUAL\fR.\&
 .P
+\fBtoday\fR \fIYYYYMMDD\fR opens the journal file for the specified day instead of
+today.\&
+.P
 \fBprevday\fR opens the most recent journal file excluding today'\&s file using
 \fIVISUAL\fR.\&
 .P
@@ -49,12 +52,6 @@ today'\&s/yesterday'\&s/tomorrow'\&s date using \fIVISUAL\fR.\&
 .P
 \fBweek\fR/\fBprevweek\fR/\fBnextweek\fR renders all the journal files for this/the
 previous/the next week using \fIPAGER\fR.\&
-.P
-If a date in the \fIYYYYMMDD\fR format is provided, that date is used instead of the
-one inferred from the program name.\&
-.P
-If a \fIFILE\fR is provided, that file is rendered instead of the files inferred
-from the program name.\&
 .P
 If a journal file is empty or contains only whitespace after being edited it
 will be deleted.\&
@@ -64,15 +61,19 @@ The journal files are stored in the first directory among \fI$TODAY_DIR\fR,
 .P
 .P
 .P
-.SH OPTIONS
+.SH TODAY OPTIONS
+.P
+The following options are only available for \fItoday\fR.\&
 .P
 \fB-c, --carry-regex\fR=[REGEX]
 .RS 4
 Move all text between the line matching the REGEX and the end of the file
 inclusive from the \fIprevday\fR to the \fItoday\fR file.\& The default REGEX is
-\fB^#+TODO$\fR.\& This option is only available for \fItoday\fR.\&
+\fB^#+TODO$\fR.\&
 .P
 .RE
+.SH COMMON OPTIONS
+.P
 \fB-h, --help\fR
 .RS 4
 Show the program help.\&
