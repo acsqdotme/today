@@ -225,7 +225,7 @@ def day_header_style(day_header: str) -> str:
 
 
 def add_common_args(parser) -> None:
-    parser.add_argument('--version', action='version',
+    parser.add_argument('-V', '--version', action='version',
             version='%(prog)s ' + _version)
 
 

@@ -60,6 +60,9 @@ _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 *-h, --help*
 	Show the program help.
 
+*-V, --version*
+	Show the program version.
+
 
 
 # ENVIRONMENT VARIABLES
