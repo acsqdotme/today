@@ -1,4 +1,4 @@
-today(1) "today 1.1.2"
+today(1) "today 2.0.0"
 
 # NAME
 
@@ -122,8 +122,6 @@ will. Specifically you can redistribute and/or modify it under the terms of the
 GNU General Public License https://www.gnu.org/licenses/gpl.html as published
 by the Free Software Foundation, either version 3 of the License, or (at your
 option) any later version.
-
-
 
 ; SPDX-FileCopyrightText: 2020-2021 Sotiris Papatheodorou
 ; SPDX-License-Identifier: GPL-3.0-or-later

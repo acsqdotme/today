@@ -16,7 +16,7 @@ from typing import List, Union
 
 
 
-_version = "1.1.2"
+_version = "2.0.0"
 _date_format_file = '%Y%m%d'
 _date_format_pretty = '%Y/%m/%d %A'
 _help_desc_common = 'Keep a daily journal.'
