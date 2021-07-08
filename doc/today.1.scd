@@ -11,10 +11,10 @@ today - keep a daily journal
 *today*     [_OPTION_]... [_YYYYMMDD_]++
 *yesterday* [_OPTION_]... [_YYYYMMDD_]++
 *tomorrow*  [_OPTION_]... [_YYYYMMDD_]++
-*lastday*   [_OPTION_]... [_YYYYMMDD_]++
+*prevday*   [_OPTION_]... [_YYYYMMDD_]++
 *nextday*   [_OPTION_]... [_YYYYMMDD_]++
 *week*      [_OPTION_]... [_FILE_]...++
-*lastweek*  [_OPTION_]... [_FILE_]...++
+*prevweek*  [_OPTION_]... [_FILE_]...++
 *nextweek*  [_OPTION_]... [_FILE_]...
 
 
@@ -28,13 +28,13 @@ motivation was to create an easy to use daily work journal.
 *today*/*yesterday*/*tomorrow* opens file YYYYMMDD.md with
 today's/yesterday's/tomorrow's date using _VISUAL_.
 
-*lastday* opens the most recent journal file excluding today's file using
+*prevday* opens the most recent journal file excluding today's file using
 _VISUAL_.
 
 *nextday* opens the closest future journal file using _VISUAL_.
 
-*week*/*lastweek*/*nextweek* renders all the journal files for this/the last/the
-next week using _PAGER_.
+*week*/*prevweek*/*nextweek* renders all the journal files for this/the
+previous/the next week using _PAGER_.
 
 If a date in the _YYYYMMDD_ format is provided, that date is used instead of the
 one inferred from the program name.
@@ -54,7 +54,7 @@ _$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
 
 *-c, --carry-regex*=[REGEX]
 	Move all text between the line matching the REGEX and the end of the file
-	inclusive from the _lastday_ to the _today_ file. The default REGEX is
+	inclusive from the _prevday_ to the _today_ file. The default REGEX is
 	*'^#+TODO$'*. This option is only available for _today_.
 
 *-s, --suffix*=_SUFFIX_

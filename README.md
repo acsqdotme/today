@@ -29,10 +29,10 @@ which act as shortcuts for common tasks.
 today     # Edit today's journal
 yesterday # Edit yesterday's journal
 tomorrow  # Edit tomorrow's journal
-lastday   # Edit the most recent journal excluding today's journal
+prevday   # Edit the most recent journal excluding today's journal
 week      # Pretty print this week's journals
-lastweek  # Pretty print last week's journals
-nextweek  # Pretty print next week's journals
+prevweek  # Pretty print the previous week's journals
+nextweek  # Pretty print the next week's journals
 ```
 
 See the `today` manpage for more detailed information.

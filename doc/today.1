@@ -5,7 +5,7 @@
 .nh
 .ad l
 .\" Begin generated content:
-.TH "today" "1" "2021-05-20" "today 1.1.2"
+.TH "today" "1" "2021-07-08" "today 1.1.2"
 .P
 .SH NAME
 .P
@@ -21,13 +21,13 @@ today - keep a daily journal
 .br
 \fBtomorrow\fR  [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
 .br
-\fBlastday\fR   [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
+\fBprevday\fR   [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
 .br
 \fBnextday\fR   [\fIOPTION\fR].\&.\&.\& [\fIYYYYMMDD\fR]
 .br
 \fBweek\fR      [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
 .br
-\fBlastweek\fR  [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
+\fBprevweek\fR  [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
 .br
 \fBnextweek\fR  [\fIOPTION\fR].\&.\&.\& [\fIFILE\fR].\&.\&.\&
 .P
@@ -42,13 +42,13 @@ motivation was to create an easy to use daily work journal.\&
 \fBtoday\fR/\fByesterday\fR/\fBtomorrow\fR opens file YYYYMMDD.\&md with
 today'\&s/yesterday'\&s/tomorrow'\&s date using \fIVISUAL\fR.\&
 .P
-\fBlastday\fR opens the most recent journal file excluding today'\&s file using
+\fBprevday\fR opens the most recent journal file excluding today'\&s file using
 \fIVISUAL\fR.\&
 .P
 \fBnextday\fR opens the closest future journal file using \fIVISUAL\fR.\&
 .P
-\fBweek\fR/\fBlastweek\fR/\fBnextweek\fR renders all the journal files for this/the last/the
-next week using \fIPAGER\fR.\&
+\fBweek\fR/\fBprevweek\fR/\fBnextweek\fR renders all the journal files for this/the
+previous/the next week using \fIPAGER\fR.\&
 .P
 If a date in the \fIYYYYMMDD\fR format is provided, that date is used instead of the
 one inferred from the program name.\&
@@ -69,7 +69,7 @@ The journal files are stored in the first directory among \fI$TODAYDIR\fR,
 \fB-c, --carry-regex\fR=[REGEX]
 .RS 4
 Move all text between the line matching the REGEX and the end of the file
-inclusive from the \fIlastday\fR to the \fItoday\fR file.\& The default REGEX is
+inclusive from the \fIprevday\fR to the \fItoday\fR file.\& The default REGEX is
 \fB'\&^#+TODO$'\&\fR.\& This option is only available for \fItoday\fR.\&
 .P
 .RE

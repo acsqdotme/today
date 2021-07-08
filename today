@@ -25,11 +25,11 @@ _help_desc_common = 'Keep a daily journal.'
 _help_desc = {'today': "Edit today's journal file using VISUAL.",
     'yesterday': "Edit yesterday's journal file using VISUAL.",
     'tomorrow': "Edit tomorrow's journal file using VISUAL.",
-    'lastday': "Edit the most recent journal file excluding today's file using VISUAL.",
+    'prevday': "Edit the most recent journal file excluding today's file using VISUAL.",
     'nextday': "Edit the closest future journal file using VISUAL.",
     'week': "Render all the journal files for this week using PAGER.",
-    'lastweek': "Render all the journal files for last week using PAGER.",
-    'nextweek': "Render all the journal files for next week using PAGER."}
+    'prevweek': "Render all the journal files for the previous week using PAGER.",
+    'nextweek': "Render all the journal files for the next week using PAGER."}
 _help_epilog = '''The journal files are stored in the first directory
 among $TODAYDIR, $XDG_DATA_HOME/today and $HOME/.local/share/today that
 exists.'''
@@ -112,7 +112,7 @@ def str_to_date(s: str) -> Union[datetime.date, None]:
 
 
 
-def last_date(suffix: str) -> List[datetime.date]:
+def prev_date(suffix: str) -> List[datetime.date]:
     """Find the date of the latest journal that is not today's journal"""
     # Get the filenames of all journal files and remove the extensions
     _, _, filenames = next(os.walk(journal_dir()))
@@ -154,13 +154,13 @@ def program_name_to_date_range(suffix: str) -> List[datetime.date]:
         return [today - datetime.timedelta(1)]
     elif name == 'tomorrow':
         return [today + datetime.timedelta(1)]
-    elif name == 'lastday':
-        return last_date(suffix)
+    elif name == 'prevday':
+        return prev_date(suffix)
     elif name == 'nextday':
         return next_date(suffix)
     elif name == 'week':
         return date_to_week(today)
-    elif name == 'lastweek':
+    elif name == 'prevweek':
         return date_to_week(today - datetime.timedelta(7))
     elif name == 'nextweek':
         return date_to_week(today + datetime.timedelta(7))
@@ -255,7 +255,7 @@ def parse_args_edit(name: str) -> argparse.Namespace:
         parser.add_argument('-c', '--carry-regex', metavar='REGEX', nargs='?',
                 const='^#+ TODO$', default=None,
                 help='move all text between the line matching the REGEX and '
-                'the end of the file inclusive from the "lastday" to the '
+                'the end of the file inclusive from the "prevday" to the '
                 '"today" file. The default REGEX is \'^#+ TODO$\'')
     add_common_args(parser)
     args = parser.parse_args()
@@ -350,19 +350,19 @@ def edit_date(args: argparse.Namespace) -> None:
     # Create the journal directory
     Path(journal_dir()).mkdir(parents=True, exist_ok=True)
     filename = args.filenames[0]
-    # Carry over content from lastday
+    # Carry over content from prevday
     should_carry = args.carry_regex is not None
     if should_carry:
-        lastday_filename = dates_to_files(last_date(args.suffix), args.suffix)[0]
-        carried_content = get_after_regex(lastday_filename, args.carry_regex)
-        # Append lastday's content to today's file
+        prevday_filename = dates_to_files(prev_date(args.suffix), args.suffix)[0]
+        carried_content = get_after_regex(prevday_filename, args.carry_regex)
+        # Append prevday's content to today's file
         if carried_content:
             with open(filename, 'a') as f:
                 f.write('\n\n\n')
                 f.write(carried_content)
         # Remove the carried content from the previous file
-        left_content = get_before_regex(lastday_filename, args.carry_regex)
-        with open(lastday_filename, 'w') as f:
+        left_content = get_before_regex(prevday_filename, args.carry_regex)
+        with open(prevday_filename, 'w') as f:
             f.write(left_content)
     result = subprocess.run([editor(), filename], stderr=subprocess.PIPE)
     success = result.returncode == 0
@@ -386,7 +386,7 @@ def edit_date(args: argparse.Namespace) -> None:
 
 if __name__ == "__main__":
     name = os.path.basename(sys.argv[0])
-    if name in ['week', 'lastweek', 'nextweek']:
+    if name in ['week', 'prevweek', 'nextweek']:
         args = parse_args_show(name)
         show_dates(args)
     else:
