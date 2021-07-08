@@ -3,8 +3,6 @@
 # SPDX-FileCopyrightText: 2020-2021 Sotiris Papatheodorou
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# TODO Accept a date range instead of FILE
-
 import argparse
 import datetime
 import os
@@ -209,6 +207,91 @@ def files_to_dates(files: List[str], suffix: str) -> List[datetime.date]:
 
 
 
+def oldest_date(suffix: str) -> Union[datetime.date, None]:
+    """Return the oldest date for which a journal file exists"""
+    _, _, filenames = next(os.walk(journal_dir()))
+    dates = files_to_dates(filenames, suffix)
+    # Return the oldest day
+    dates.sort()
+    if dates:
+        return dates[0]
+    else:
+        return None
+
+
+
+def newest_date(suffix: str) -> Union[datetime.date, None]:
+    """Return the newest date for which a journal file exists"""
+    _, _, filenames = next(os.walk(journal_dir()))
+    dates = files_to_dates(filenames, suffix)
+    # Return the oldest day
+    dates.sort()
+    if dates:
+        return dates[-1]
+    else:
+        return None
+
+
+
+def range_of_dates(start_date: datetime.date, end_date: datetime.date) -> List[datetime.date]:
+    num_days = ((end_date - start_date) // datetime.timedelta(1)) + 1
+    return [start_date + datetime.timedelta(x) for x in range(num_days)]
+
+
+
+def range_str_to_dates(date_range: str, suffix: str) -> List[datetime.date]:
+    """Extract the dates from a date range"""
+    if date_range.startswith('-'):
+        # Parse the end date
+        end_date = str_to_date(date_range.lstrip('-'))
+        if end_date is None:
+            printerr('Invalid date ' + date_range.lstrip('-'))
+            return []
+        start_date = oldest_date(suffix)
+        if start_date is None or start_date > end_date:
+            dates = [end_date]
+        else:
+            dates = range_of_dates(start_date, end_date)
+    elif date_range.endswith('-'):
+        # Parse the start date
+        start_date = str_to_date(date_range.rstrip('-'))
+        if start_date is None:
+            printerr('Invalid date ' + date_range.rstrip('-'))
+            return []
+        end_date = newest_date(suffix)
+        if end_date is None or start_date > end_date:
+            dates = [start_date]
+        else:
+            dates = range_of_dates(start_date, end_date)
+    elif '-' in date_range:
+        # Split the range into the start and end dates
+        d = date_range.split('-')
+        if len(d) != 2:
+            printerr('Invalid date range' + date_range)
+            return []
+        # Parse the start date
+        start_date = str_to_date(d[0])
+        if start_date is None:
+            printerr('Invalid date ' + d[0])
+            return []
+        # Parse the end date
+        end_date = str_to_date(d[1])
+        if end_date is None:
+            printerr('Invalid date ' + d[1])
+            return []
+        if start_date > end_date:
+            printerr('The start date can\'t be greater than the end date')
+            return []
+        dates = range_of_dates(start_date, end_date)
+    else:
+        dates = [str_to_date(date_range)]
+        if dates[0] is None:
+            printerr('Invalid date ' + date_range)
+            return []
+    return dates
+
+
+
 def special_style(todo_header: str, in_terminal: bool) -> str:
     if in_terminal:
         return ''.join([ansi('bold'), ansi('red'), todo_header, ansi('normal')])
@@ -276,19 +359,28 @@ def parse_args_today(name: str) -> argparse.Namespace:
                 help='move all text between the line matching the REGEX and '
                 'the end of the file inclusive from the "prevday" to the '
                 '"today" file. The default REGEX is \'^#+ TODO$\'')
+        parser.add_argument('-v', '--view', metavar='DATES',
+                default=None,
+                help='view all journal files for the date range DATES. DATES '
+                'can be YYYYMMDD, START_DATE-, -END_DATE or '
+                'START_DATE-END_DATE where START_DATE and END_DATE are in the '
+                'format YYYYMMDD')
     add_common_args(parser)
     args = parser.parse_args()
     # Post-process arguments
     process_common_args(args)
-    if os.path.basename(sys.argv[0]) == 'today' and args.carry_regex is not None:
+    if args.carry_regex is not None:
         args.carry_regex = re.compile(args.carry_regex)
-    else:
-        args.carry_regex = None
     if args.date is not None:
         # A date was given as an argument, use it
         args.dates = [str_to_date(args.date)]
         if args.dates[0] is None:
             printerr('Invalid date format, expected YYYYMMDD')
+            sys.exit(2)
+    elif args.view is not None:
+        # Compute the dates to use from the date range expression
+        args.dates = range_str_to_dates(args.view, args.suffix)
+        if not args.dates:
             sys.exit(2)
     else:
         # Compute the dates to use based on the program name
@@ -335,29 +427,35 @@ def get_after_regex(filename: str, regex: re.Pattern) -> str:
 
 def show_dates(args: argparse.Namespace) -> None:
     """Show all the journals for the supplied dates in the user's preferred pager"""
-    # Write to the stdin of the pager directly
-    with subprocess.Popen([pager(), '-R'], stdin=subprocess.PIPE, universal_newlines=True) as p:
-        # Create a header with the date range if applicable
-        if len(args.dates) > 1:
-            start_date = args.dates[0].strftime(_date_format_pretty)
-            end_date = args.dates[-1].strftime(_date_format_pretty)
-            header = ''.join([start_date, ' - ', end_date, '\n\n'])
-            header = header_style(header, args.in_terminal)
-            p.stdin.write(header)
-        # Loop over each day and output the contents of the respective file if
-        # it exists
-        for idx, day in enumerate(args.dates):
-            filename = args.filenames[idx]
-            if os.path.exists(filename):
-                with open(filename) as f:
-                    day_header = ''.join(['# ', day.strftime(_date_format_pretty), '\n\n'])
-                    day_header = day_header_style(day_header, args.in_terminal)
-                    p.stdin.write(day_header)
-                    for line in f:
-                        if args.special_pattern.match(line) is not None:
-                            line = special_style(line, args.in_terminal)
-                        p.stdin.write(line)
-                    p.stdin.write('\n\n')
+    try:
+        # Write to the stdin of the pager directly
+        with subprocess.Popen([pager(), '-R'], stdin=subprocess.PIPE, universal_newlines=True) as p:
+            # Create a header with the date range if applicable
+            if len(args.dates) > 1:
+                start_date = args.dates[0].strftime(_date_format_pretty)
+                end_date = args.dates[-1].strftime(_date_format_pretty)
+                header = ''.join([start_date, ' - ', end_date, '\n\n'])
+                header = header_style(header, args.in_terminal)
+                p.stdin.write(header)
+            # Loop over each day and output the contents of the respective file if
+            # it exists
+            for idx, day in enumerate(args.dates):
+                filename = args.filenames[idx]
+                if os.path.exists(filename):
+                    with open(filename) as f:
+                        day_header = ''.join(['# ', day.strftime(_date_format_pretty), '\n\n'])
+                        day_header = day_header_style(day_header, args.in_terminal)
+                        p.stdin.write(day_header)
+                        for line in f:
+                            if args.special_pattern.match(line) is not None:
+                                line = special_style(line, args.in_terminal)
+                            p.stdin.write(line)
+                        p.stdin.write('\n\n')
+    except BrokenPipeError:
+        # When writing a large amount of data, less will not consume all of it
+        # without scrolling to the bottom and Python will throw a
+        # BrokenPipeError
+        pass
 
 
 
@@ -407,7 +505,10 @@ if __name__ == "__main__":
     name = os.path.basename(sys.argv[0])
     if name == 'today':
         args = parse_args_today(name)
-        edit_date(args)
+        if args.view is not None:
+            show_dates(args)
+        else:
+            edit_date(args)
     elif name in ['week', 'prevweek', 'nextweek']:
         args = parse_args_common(name)
         show_dates(args)

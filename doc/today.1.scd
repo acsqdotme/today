@@ -56,6 +56,11 @@ The following options are only available for _today_.
 	inclusive from the _prevday_ to the _today_ file. The default REGEX is
 	*^#+TODO$*.
 
+*-v, --view*=_DATES_
+	View all journal files for the date range _DATES_. _DATES_ can be
+	_YYYYMMDD_, _START_DATE-_, _-END_DATE_ or _START_DATE-END_DATE_ where
+	_START_DATE_ and _END_DATE_ are in the format _YYYYMMDD_.
+
 # COMMON OPTIONS
 
 *-h, --help*
