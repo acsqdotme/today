@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-#
 # SPDX-FileCopyrightText: 2020-2021 Sotiris Papatheodorou
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import argparse
-import calendar
-import datetime
 import os
 import re
 import subprocess
 import sys
 
+from calendar import monthrange
+from datetime import date, timedelta
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List, Union
@@ -110,34 +109,35 @@ def ansi(style: str) -> str:
 
 
 def days_in_month(year: int, month: int) -> int:
-    return calendar.monthrange(year, month)[1]
+    """Return the number of days in the given month of the given year"""
+    return monthrange(year, month)[1]
 
 
 
-def date_to_week(date: datetime.date) -> List[datetime.date]:
+def date_to_week(d: date) -> List[date]:
     """Get all the dates of the week the supplied date is part of"""
-    week_start = date - datetime.timedelta(date.weekday())
+    week_start = d - timedelta(d.weekday())
     offsets = range(0, 7)
-    return [week_start + datetime.timedelta(x) for x in offsets]
+    return [week_start + timedelta(x) for x in offsets]
 
 
 
-def date_to_month(date: datetime.date) -> List[datetime.date]:
+def date_to_month(d: date) -> List[date]:
     """Get all the dates of the month the supplied date is part of"""
-    month_start = date - datetime.timedelta(date.day - 1)
-    offsets = range(0, days_in_month(date.year, date.month))
-    return [month_start + datetime.timedelta(x) for x in offsets]
+    month_start = d - timedelta(d.day - 1)
+    offsets = range(0, days_in_month(d.year, d.month))
+    return [month_start + timedelta(x) for x in offsets]
 
 
 
-def str_to_date(s: str) -> Union[datetime.date, None]:
+def str_to_date(s: str) -> Union[date, None]:
     """Convert a string in the format YYYYMMDD to a datetime.date"""
     if s.isdigit() and len(s) == 8:
         year = int(s[0:4])
         month = int(s[4:6])
         day = int(s[6:8])
         try:
-            return datetime.date(year, month, day)
+            return date(year, month, day)
         except ValueError:
             return None
     else:
@@ -145,48 +145,48 @@ def str_to_date(s: str) -> Union[datetime.date, None]:
 
 
 
-def prev_date(suffix: str) -> List[datetime.date]:
+def prev_date(suffix: str) -> List[date]:
     """Find the date of the latest journal that is not today's journal"""
-    # Get the filenames of all journal files and remove the extensions
+    # Get the dates of all journal files
     _, _, filenames = next(os.walk(journal_dir()))
-    dates_str = [x[:-3] for x in filenames if x.endswith(suffix)]
+    dates = files_to_dates(filenames, suffix)
     # Remove all dates corresponding to today or in the future
-    today_str = datetime.date.today().strftime(_date_format_file)
-    dates_str = [d for d in dates_str if d < today_str]
+    today = date.today()
+    dates = [d for d in dates if d < today]
     # Return the latest day
-    dates_str.sort()
-    if dates_str:
-        return [str_to_date(dates_str[-1])]
+    dates.sort()
+    if dates:
+        return [dates[-1]]
     else:
         return []
 
 
 
-def next_date(suffix: str) -> List[datetime.date]:
+def next_date(suffix: str) -> List[date]:
     """Find the date of the next journal that is not today's journal"""
-    # Get the filenames of all journal files and remove the extensions
+    # Get the dates of all journal files
     _, _, filenames = next(os.walk(journal_dir()))
-    dates_str = [x[:-3] for x in filenames if x.endswith(suffix)]
+    dates = files_to_dates(filenames, suffix)
     # Remove all dates corresponding to today or in the past
-    today_str = datetime.date.today().strftime(_date_format_file)
-    dates_str = [d for d in dates_str if d > today_str]
+    today = date.today()
+    dates = [d for d in dates if d > today]
     # Return the oldest day
-    dates_str.sort()
-    if dates_str:
-        return [str_to_date(dates_str[0])]
+    dates.sort()
+    if dates:
+        return [dates[0]]
     else:
         return []
 
 
 
-def program_name_to_date_range(suffix: str) -> List[datetime.date]:
+def program_name_to_date_range(suffix: str) -> List[date]:
     """Create a list of dates based on the program name"""
     name = os.path.basename(sys.argv[0])
-    today = datetime.date.today()
+    today = date.today()
     if name == 'yesterday':
-        return [today - datetime.timedelta(1)]
+        return [today - timedelta(1)]
     elif name == 'tomorrow':
-        return [today + datetime.timedelta(1)]
+        return [today + timedelta(1)]
     elif name == 'prevday':
         return prev_date(suffix)
     elif name == 'nextday':
@@ -194,43 +194,45 @@ def program_name_to_date_range(suffix: str) -> List[datetime.date]:
     elif name == 'week':
         return date_to_week(today)
     elif name == 'prevweek':
-        return date_to_week(today - datetime.timedelta(7))
+        return date_to_week(today - timedelta(7))
     elif name == 'nextweek':
-        return date_to_week(today + datetime.timedelta(7))
+        return date_to_week(today + timedelta(7))
     elif name == 'month':
         return date_to_month(today)
     elif name == 'prevmonth':
-        return date_to_month(today - datetime.timedelta(days_in_month(today.year, today.month)))
+        prev_month_offset = timedelta(days_in_month(today.year, today.month))
+        return date_to_month(today - prev_month_offset)
     elif name == 'nextmonth':
-        return date_to_month(today + datetime.timedelta(days_in_month(today.year, today.month)))
+        next_month_offset = timedelta(days_in_month(today.year, today.month))
+        return date_to_month(today + next_month_offset)
     else:
         return [today]
 
 
 
-def dates_to_files(dates: List[datetime.date], suffix: str) -> List[str]:
+def dates_to_files(dates: List[date], suffix: str) -> List[str]:
     """Convert a list of dates to journal filenames"""
     files = []
     dir = journal_dir()
-    for date in dates:
-        files.append(dir + '/' + date.strftime(_date_format_file) + suffix)
+    for d in dates:
+        files.append(dir + '/' + d.strftime(_date_format_file) + suffix)
     return files
 
 
 
-def files_to_dates(files: List[str], suffix: str) -> List[datetime.date]:
+def files_to_dates(files: List[str], suffix: str) -> List[date]:
     """Extract the dates from a list of filenames"""
     dates = []
     for file in files:
         if len(file) >= 11:
-            date = str_to_date(file[-11:-len(suffix)])
-            if date is not None:
-                dates.append(date)
+            d = str_to_date(file[-11:-len(suffix)])
+            if d is not None:
+                dates.append(d)
     return dates
 
 
 
-def oldest_date(suffix: str) -> Union[datetime.date, None]:
+def oldest_date(suffix: str) -> Union[date, None]:
     """Return the oldest date for which a journal file exists"""
     _, _, filenames = next(os.walk(journal_dir()))
     dates = files_to_dates(filenames, suffix)
@@ -243,11 +245,11 @@ def oldest_date(suffix: str) -> Union[datetime.date, None]:
 
 
 
-def newest_date(suffix: str) -> Union[datetime.date, None]:
+def newest_date(suffix: str) -> Union[date, None]:
     """Return the newest date for which a journal file exists"""
     _, _, filenames = next(os.walk(journal_dir()))
     dates = files_to_dates(filenames, suffix)
-    # Return the oldest day
+    # Return the newest day
     dates.sort()
     if dates:
         return dates[-1]
@@ -256,14 +258,15 @@ def newest_date(suffix: str) -> Union[datetime.date, None]:
 
 
 
-def range_of_dates(start_date: datetime.date, end_date: datetime.date) -> List[datetime.date]:
-    num_days = ((end_date - start_date) // datetime.timedelta(1)) + 1
-    return [start_date + datetime.timedelta(x) for x in range(num_days)]
+def range_of_dates(start_date: date, end_date: date) -> List[date]:
+    """Return a list containing all dates from start_date to end_date inclusive"""
+    num_days = ((end_date - start_date) // timedelta(1)) + 1
+    return [start_date + timedelta(x) for x in range(num_days)]
 
 
 
-def range_str_to_dates(date_range: str, suffix: str) -> List[datetime.date]:
-    """Extract the dates from a date range"""
+def range_str_to_dates(date_range: str, suffix: str) -> List[date]:
+    """Extract the dates from a date range string"""
     if date_range.startswith('-'):
         # Parse the end date
         end_date = str_to_date(date_range.lstrip('-'))
@@ -353,7 +356,7 @@ def process_common_args(args: argparse.Namespace) -> None:
 
 
 
-def parse_args_common(name: str) -> argparse.Namespace:
+def parse_common_args(name: str) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
             description=' '.join([_help_desc_common, _help_desc[name]]),
             epilog=_help_epilog)
@@ -369,25 +372,24 @@ def parse_args_common(name: str) -> argparse.Namespace:
 
 
 
-def parse_args_today(name: str) -> argparse.Namespace:
+def parse_today_args(name: str) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
             description=' '.join([_help_desc_common, _help_desc[name]]),
             epilog=_help_epilog)
     parser.add_argument('date', metavar='YYYYMMDD', nargs='?',
             help='edit the journal for YYYYMMDD instead of the date inferred '
             'from the program name')
-    if os.path.basename(sys.argv[0]) == 'today':
-        parser.add_argument('-c', '--carry-regex', metavar='REGEX', nargs='?',
-                const='^#+ TODO$', default=None,
-                help='move all text between the line matching the REGEX and '
-                'the end of the file inclusive from the "prevday" to the '
-                '"today" file. The default REGEX is \'^#+ TODO$\'')
-        parser.add_argument('-v', '--view', metavar='DATES',
-                default=None,
-                help='view all journal files for the date range DATES. DATES '
-                'can be YYYYMMDD, START_DATE-, -END_DATE or '
-                'START_DATE-END_DATE where START_DATE and END_DATE are in the '
-                'format YYYYMMDD')
+    parser.add_argument('-c', '--carry-regex', metavar='REGEX', nargs='?',
+            const='^#+ TODO$', default=None,
+            help='move all text between the line matching the REGEX and '
+            'the end of the file inclusive from the "prevday" to the '
+            '"today" file. The default REGEX is \'^#+ TODO$\'')
+    parser.add_argument('-v', '--view', metavar='DATES',
+            default=None,
+            help='view all journal files for the date range DATES. DATES '
+            'can be YYYYMMDD, START_DATE-, -END_DATE or '
+            'START_DATE-END_DATE where START_DATE and END_DATE are in the '
+            'format YYYYMMDD')
     add_common_args(parser)
     args = parser.parse_args()
     # Post-process arguments
@@ -450,6 +452,8 @@ def get_after_regex(filename: str, regex: re.Pattern) -> str:
 
 def show_dates(args: argparse.Namespace) -> None:
     """Show all the journals for the supplied dates in the user's preferred pager"""
+    # TODO don't start pager() and write directly to stdout if it's not
+    # connected to a terminal
     try:
         # Write to the stdin of the pager directly
         with subprocess.Popen([pager(), '-R'], stdin=subprocess.PIPE, universal_newlines=True) as p:
@@ -527,15 +531,15 @@ def edit_date(args: argparse.Namespace) -> None:
 if __name__ == "__main__":
     name = os.path.basename(sys.argv[0])
     if name == 'today':
-        args = parse_args_today(name)
-        if args.view is not None:
-            show_dates(args)
-        else:
+        args = parse_today_args(name)
+        if args.view is None:
             edit_date(args)
-    elif name in ['week', 'prevweek', 'nextweek', 'month', 'prevmonth', 'nextmonth']:
-        args = parse_args_common(name)
-        show_dates(args)
-    else:
-        args = parse_args_common(name)
+        else:
+            show_dates(args)
+    elif name in ['yesterday', 'tomorrow', 'prevday', 'nextday']:
+        args = parse_common_args(name)
         edit_date(args)
+    else:
+        args = parse_common_args(name)
+        show_dates(args)
 
