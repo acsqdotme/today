@@ -355,7 +355,7 @@ def show_dates(args: argparse.Namespace) -> None:
             filename = args.filenames[idx]
             if os.path.exists(filename):
                 with open(filename) as f:
-                    day_header = ''.join([day.strftime(_date_format_pretty), '\n\n'])
+                    day_header = ''.join(['# ', day.strftime(_date_format_pretty), '\n\n'])
                     day_header = day_header_style(day_header, args.in_terminal)
                     p.stdin.write(day_header)
                     for line in f:
