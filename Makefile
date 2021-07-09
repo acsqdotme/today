@@ -31,10 +31,10 @@ doc: doc/today.1
 
 .PHONY: install
 install: all
-	install -D --target-directory $(BINDIR) month nextday nextmonth nextweek prevday prevmonth prevweek tomorrow week yesterday
+	install -D --target-directory $(BINDIR) today month nextday nextmonth nextweek prevday prevmonth prevweek tomorrow week yesterday
 	install -D -m 644 doc/today.1 $(MANDIR)/man1/today.1
 
 .PHONY: uninstall
 uninstall:
-	rm -f $(BINDIR)/month $(BINDIR)/nextday $(BINDIR)/nextmonth $(BINDIR)/nextweek $(BINDIR)/prevday $(BINDIR)/prevmonth $(BINDIR)/prevweek $(BINDIR)/tomorrow $(BINDIR)/week $(BINDIR)/yesterday $(MANDIR)/man1/today.1
+	rm -f $(BINDIR)/today $(BINDIR)/month $(BINDIR)/nextday $(BINDIR)/nextmonth $(BINDIR)/nextweek $(BINDIR)/prevday $(BINDIR)/prevmonth $(BINDIR)/prevweek $(BINDIR)/tomorrow $(BINDIR)/week $(BINDIR)/yesterday $(MANDIR)/man1/today.1
 
