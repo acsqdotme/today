@@ -349,7 +349,8 @@ def add_common_args(parser) -> None:
 
 
 def process_common_args(args: argparse.Namespace) -> None:
-    args.carry_regex = None
+    if 'carry_regex' not in args:
+        args.carry_regex = None
     args.in_terminal = sys.stdout.isatty()
     args.suffix = journal_suffix()
     args.special_pattern = re.compile(special_regex())
