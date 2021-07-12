@@ -460,22 +460,30 @@ def show_dates(args: argparse.Namespace) -> None:
         with subprocess.Popen([pager(), '-R'], stdin=subprocess.PIPE, universal_newlines=True) as p:
             # Create a header with the date range if applicable
             if len(args.dates) > 1:
+                heading_offset = '##'
                 start_date = args.dates[0].strftime(_date_format_pretty)
                 end_date = args.dates[-1].strftime(_date_format_pretty)
-                header = ''.join([start_date, ' - ', end_date, '\n\n'])
+                header = ''.join(['# ', start_date, ' - ', end_date, '\n\n'])
                 header = header_style(header, args.in_terminal)
                 p.stdin.write(header)
+            else:
+                heading_offset = '#'
             # Loop over each day and output the contents of the respective file if
             # it exists
             for idx, day in enumerate(args.dates):
                 filename = args.filenames[idx]
                 if os.path.exists(filename):
                     with open(filename) as f:
-                        day_header = ''.join(['# ', day.strftime(_date_format_pretty), '\n\n'])
+                        day_header = ''.join([heading_offset, ' ', day.strftime(_date_format_pretty), '\n\n'])
                         day_header = day_header_style(day_header, args.in_terminal)
                         p.stdin.write(day_header)
                         for line in f:
-                            if args.special_pattern.match(line) is not None:
+                            original_line = line
+                            # Increment the heading levels since we added file
+                            # and per-day headings.
+                            if line.startswith('#'):
+                                line = ''.join([heading_offset, line])
+                            if args.special_pattern.match(original_line) is not None:
                                 line = special_style(line, args.in_terminal)
                             p.stdin.write(line)
                         p.stdin.write('\n\n')
