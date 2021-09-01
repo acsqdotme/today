@@ -16,9 +16,9 @@ today - keep a daily journal
 *week*      [_OPTION_]...++
 *prevweek*  [_OPTION_]...++
 *nextweek*  [_OPTION_]...++
-*month*      [_OPTION_]...++
-*prevmonth*  [_OPTION_]...++
-*nextmonth*  [_OPTION_]...
+*month*     [_OPTION_]...++
+*prevmonth* [_OPTION_]...++
+*nextmonth* [_OPTION_]...
 
 
 
@@ -63,7 +63,7 @@ The following options are only available for _today_.
 	*^#+TODO$*.
 
 *-v, --view*=_DATES_
-	View all journal files for the date range _DATES_. _DATES_ can be
+	View all journal files for the date expression _DATES_. _DATES_ can be
 	_YYYYMMDD_, _START_DATE-_, _-END_DATE_ or _START_DATE-END_DATE_ where
 	_START_DATE_ and _END_DATE_ are in the format _YYYYMMDD_.
 
