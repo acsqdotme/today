@@ -1,554 +1,163 @@
-#!/usr/bin/env python3
-# SPDX-FileCopyrightText: 2020-2021 Sotiris Papatheodorou
+#!/bin/sh
+# today - keep a daily journal
+# SPDX-FileCopyrightText: 2022 Sotiris Papatheodorou
 # SPDX-License-Identifier: GPL-3.0-or-later
-
-import argparse
-import os
-import re
-import subprocess
-import sys
-
-from calendar import monthrange
-from datetime import date, timedelta
-from pathlib import Path
-from tempfile import NamedTemporaryFile
-from typing import List, Union
-
-
-
-_version = "2.1.0"
-_date_format_file = '%Y%m%d'
-_date_format_pretty = '%Y/%m/%d %A'
-_help_desc_common = 'Keep a daily journal.'
-_help_desc = {'today': "Edit today's journal file using VISUAL.",
-    'yesterday': "Edit yesterday's journal file using VISUAL.",
-    'tomorrow': "Edit tomorrow's journal file using VISUAL.",
-    'prevday': "Edit the most recent journal file excluding today's file using VISUAL.",
-    'nextday': "Edit the closest future journal file using VISUAL.",
-    'week': "Render all the journal files for this week using PAGER.",
-    'prevweek': "Render all the journal files for the previous week using PAGER.",
-    'nextweek': "Render all the journal files for the next week using PAGER.",
-    'month': "Render all the journal files for this month using PAGER.",
-    'prevmonth': "Render all the journal files for the previous month using PAGER.",
-    'nextmonth': "Render all the journal files for the next month using PAGER."}
-_help_epilog = '''The journal files are stored in the first directory
-among $TODAY_DIR, $XDG_DATA_HOME/today and $HOME/.local/share/today that
-exists.'''
-
-
-
-def journal_dir() -> str:
-    """Return the journal directory"""
-    if 'TODAY_DIR' in os.environ:
-        return os.environ['TODAY_DIR']
-    elif 'XDG_DATA_HOME' in os.environ:
-        return os.environ['XDG_DATA_HOME'] + '/today'
-    else:
-        return os.environ['HOME'] + '/.local/share/today'
-
-
-
-def editor() -> str:
-    """Return the user's preferred text editor"""
-    if 'VISUAL' in os.environ:
-        return os.environ['VISUAL']
-    elif 'EDITOR' in os.environ:
-        return os.environ['EDITOR']
-    else:
-        return 'nano'
-
-
-
-def pager() -> str:
-    """Return the user's preferred pager"""
-    if 'PAGER' in os.environ:
-        return os.environ['PAGER']
-    else:
-        return 'less'
-
-
-
-def journal_suffix() -> str:
-    """Return the journal file suffix"""
-    if 'TODAY_SUFFIX' in os.environ:
-        return os.environ['TODAY_SUFFIX']
-    else:
-        return '.md'
-
-
-
-def special_regex() -> str:
-    """Return the regex used to highlight special lines"""
-    if 'TODAY_SPECIAL_REGEX' in os.environ:
-        return os.environ['TODAY_SPECIAL_REGEX']
-    else:
-        return '^#+ TODO$'
-
-
-
-def printerr(*args, **kwargs) -> None:
-    """Print to stderr prefixed with the program name"""
-    error_prefix = os.path.basename(sys.argv[0]) + ': error:'
-    print(error_prefix, *args, file=sys.stderr, **kwargs)
-
-
-
-def ansi(style: str) -> str:
-    """Return the corresponding ANSI escape sequence"""
-    if not sys.stdout.isatty():
-        return ''
-    to_seq = {'normal': '0', 'bold': '1', 'dim': '2', 'italic': '3',
-            'underline': '4', 'blink': '5', 'reverse': '7', 'crossout': '9',
-            'black': '30', 'red': '31', 'green': '32', 'yellow': '33',
-            'blue': '34', 'magenta': '35', 'cyan': '36', 'white': '37'}
-    if style in to_seq:
-        return ''.join(['\033[', to_seq[style], 'm'])
-    else:
-        return ''
-
-
-
-def days_in_month(year: int, month: int) -> int:
-    """Return the number of days in the given month of the given year"""
-    return monthrange(year, month)[1]
-
-
-
-def date_to_week(d: date) -> List[date]:
-    """Get all the dates of the week the supplied date is part of"""
-    week_start = d - timedelta(d.weekday())
-    offsets = range(0, 7)
-    return [week_start + timedelta(x) for x in offsets]
-
-
-
-def date_to_month(d: date) -> List[date]:
-    """Get all the dates of the month the supplied date is part of"""
-    month_start = d - timedelta(d.day - 1)
-    offsets = range(0, days_in_month(d.year, d.month))
-    return [month_start + timedelta(x) for x in offsets]
-
-
-
-def str_to_date(s: str) -> Union[date, None]:
-    """Convert a string in the format YYYYMMDD to a datetime.date"""
-    if s.isdigit() and len(s) == 8:
-        year = int(s[0:4])
-        month = int(s[4:6])
-        day = int(s[6:8])
-        try:
-            return date(year, month, day)
-        except ValueError:
-            return None
-    else:
-        return None
-
-
-
-def prev_date(suffix: str) -> List[date]:
-    """Find the date of the latest journal that is not today's journal"""
-    # Get the dates of all journal files
-    _, _, filenames = next(os.walk(journal_dir()))
-    dates = files_to_dates(filenames, suffix)
-    # Remove all dates corresponding to today or in the future
-    today = date.today()
-    dates = [d for d in dates if d < today]
-    # Return the latest day
-    dates.sort()
-    if dates:
-        return [dates[-1]]
-    else:
-        return []
-
-
-
-def next_date(suffix: str) -> List[date]:
-    """Find the date of the next journal that is not today's journal"""
-    # Get the dates of all journal files
-    _, _, filenames = next(os.walk(journal_dir()))
-    dates = files_to_dates(filenames, suffix)
-    # Remove all dates corresponding to today or in the past
-    today = date.today()
-    dates = [d for d in dates if d > today]
-    # Return the oldest day
-    dates.sort()
-    if dates:
-        return [dates[0]]
-    else:
-        return []
-
-
-
-def program_name_to_date_range(suffix: str) -> List[date]:
-    """Create a list of dates based on the program name"""
-    name = os.path.basename(sys.argv[0])
-    today = date.today()
-    if name == 'yesterday':
-        return [today - timedelta(1)]
-    elif name == 'tomorrow':
-        return [today + timedelta(1)]
-    elif name == 'prevday':
-        return prev_date(suffix)
-    elif name == 'nextday':
-        return next_date(suffix)
-    elif name == 'week':
-        return date_to_week(today)
-    elif name == 'prevweek':
-        return date_to_week(today - timedelta(7))
-    elif name == 'nextweek':
-        return date_to_week(today + timedelta(7))
-    elif name == 'month':
-        return date_to_month(today)
-    elif name == 'prevmonth':
-        prev_month_offset = timedelta(days_in_month(today.year, today.month))
-        return date_to_month(today - prev_month_offset)
-    elif name == 'nextmonth':
-        next_month_offset = timedelta(days_in_month(today.year, today.month))
-        return date_to_month(today + next_month_offset)
-    else:
-        return [today]
-
-
-
-def dates_to_files(dates: List[date], suffix: str) -> List[str]:
-    """Convert a list of dates to journal filenames"""
-    files = []
-    dir = journal_dir()
-    for d in dates:
-        files.append(dir + '/' + d.strftime(_date_format_file) + suffix)
-    return files
-
-
-
-def files_to_dates(files: List[str], suffix: str) -> List[date]:
-    """Extract the dates from a list of filenames"""
-    dates = []
-    for file in files:
-        if len(file) >= 11:
-            d = str_to_date(file[-11:-len(suffix)])
-            if d is not None:
-                dates.append(d)
-    return dates
-
-
-
-def oldest_date(suffix: str) -> Union[date, None]:
-    """Return the oldest date for which a journal file exists"""
-    _, _, filenames = next(os.walk(journal_dir()))
-    dates = files_to_dates(filenames, suffix)
-    # Return the oldest day
-    dates.sort()
-    if dates:
-        return dates[0]
-    else:
-        return None
-
-
-
-def newest_date(suffix: str) -> Union[date, None]:
-    """Return the newest date for which a journal file exists"""
-    _, _, filenames = next(os.walk(journal_dir()))
-    dates = files_to_dates(filenames, suffix)
-    # Return the newest day
-    dates.sort()
-    if dates:
-        return dates[-1]
-    else:
-        return None
-
-
-
-def range_of_dates(start_date: date, end_date: date) -> List[date]:
-    """Return a list containing all dates from start_date to end_date inclusive"""
-    num_days = ((end_date - start_date) // timedelta(1)) + 1
-    return [start_date + timedelta(x) for x in range(num_days)]
-
-
-
-def range_str_to_dates(date_range: str, suffix: str) -> List[date]:
-    """Extract the dates from a date range string"""
-    if date_range.startswith('-'):
-        # Parse the end date
-        end_date = str_to_date(date_range.lstrip('-'))
-        if end_date is None:
-            printerr('Invalid date ' + date_range.lstrip('-'))
-            return []
-        start_date = oldest_date(suffix)
-        if start_date is None or start_date > end_date:
-            dates = [end_date]
-        else:
-            dates = range_of_dates(start_date, end_date)
-    elif date_range.endswith('-'):
-        # Parse the start date
-        start_date = str_to_date(date_range.rstrip('-'))
-        if start_date is None:
-            printerr('Invalid date ' + date_range.rstrip('-'))
-            return []
-        end_date = newest_date(suffix)
-        if end_date is None or start_date > end_date:
-            dates = [start_date]
-        else:
-            dates = range_of_dates(start_date, end_date)
-    elif '-' in date_range:
-        # Split the range into the start and end dates
-        d = date_range.split('-')
-        if len(d) != 2:
-            printerr('Invalid date range' + date_range)
-            return []
-        # Parse the start date
-        start_date = str_to_date(d[0])
-        if start_date is None:
-            printerr('Invalid date ' + d[0])
-            return []
-        # Parse the end date
-        end_date = str_to_date(d[1])
-        if end_date is None:
-            printerr('Invalid date ' + d[1])
-            return []
-        if start_date > end_date:
-            printerr('The start date can\'t be greater than the end date')
-            return []
-        dates = range_of_dates(start_date, end_date)
-    else:
-        dates = [str_to_date(date_range)]
-        if dates[0] is None:
-            printerr('Invalid date ' + date_range)
-            return []
-    return dates
-
-
-
-def special_style(todo_header: str, in_terminal: bool) -> str:
-    if in_terminal:
-        return ''.join([ansi('bold'), ansi('red'), todo_header, ansi('normal')])
-    else:
-        return todo_header
-
-
-
-def header_style(header: str, in_terminal: bool) -> str:
-    if in_terminal:
-        return ''.join([ansi('bold'), ansi('blue'), header, ansi('normal')])
-    else:
-        return header
-
-
-
-def day_header_style(day_header: str, in_terminal: bool) -> str:
-    if in_terminal:
-        return ''.join([ansi('bold'), ansi('yellow'), day_header, ansi('normal')])
-    else:
-        return day_header
-
-
-
-def add_common_args(parser) -> None:
-    parser.add_argument('-V', '--version', action='version',
-            version='%(prog)s ' + _version)
-
-
-
-def process_common_args(args: argparse.Namespace) -> None:
-    if 'carry_regex' not in args:
-        args.carry_regex = None
-    args.in_terminal = sys.stdout.isatty()
-    args.suffix = journal_suffix()
-    args.special_pattern = re.compile(special_regex())
-
-
-
-def parse_common_args(name: str) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-            description=' '.join([_help_desc_common, _help_desc[name]]),
-            epilog=_help_epilog)
-    add_common_args(parser)
-    args = parser.parse_args()
-    # Post-process arguments
-    process_common_args(args)
-    # Compute the dates to use based on the program name
-    args.dates = program_name_to_date_range(args.suffix)
-    # Extract the filenames from the dates
-    args.filenames = dates_to_files(args.dates, args.suffix)
-    return args
-
-
-
-def parse_today_args(name: str) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-            description=' '.join([_help_desc_common, _help_desc[name]]),
-            epilog=_help_epilog)
-    parser.add_argument('date', metavar='YYYYMMDD', nargs='?',
-            help='edit the journal for YYYYMMDD instead of the date inferred '
-            'from the program name')
-    parser.add_argument('-c', '--carry-regex', metavar='REGEX', nargs='?',
-            const='^#+ TODO$', default=None,
-            help='move all text between the line matching the REGEX and '
-            'the end of the file inclusive from the "prevday" to the '
-            '"today" file. The default REGEX is \'^#+ TODO$\'')
-    parser.add_argument('-v', '--view', metavar='DATES',
-            default=None,
-            help='view all journal files for the date range DATES. DATES '
-            'can be YYYYMMDD, START_DATE-, -END_DATE or '
-            'START_DATE-END_DATE where START_DATE and END_DATE are in the '
-            'format YYYYMMDD')
-    add_common_args(parser)
-    args = parser.parse_args()
-    # Post-process arguments
-    process_common_args(args)
-    if args.carry_regex is not None:
-        args.carry_regex = re.compile(args.carry_regex)
-    if args.date is not None:
-        # A date was given as an argument, use it
-        args.dates = [str_to_date(args.date)]
-        if args.dates[0] is None:
-            printerr('Invalid date format, expected YYYYMMDD')
-            sys.exit(2)
-    elif args.view is not None:
-        # Compute the dates to use from the date range expression
-        args.dates = range_str_to_dates(args.view, args.suffix)
-        if not args.dates:
-            sys.exit(2)
-    else:
-        # Compute the dates to use based on the program name
-        args.dates = program_name_to_date_range(args.suffix)
-    # Extract the filenames from the dates
-    args.filenames = dates_to_files(args.dates, args.suffix)
-    return args
-
-
-
-def get_before_regex(filename: str, regex: re.Pattern) -> str:
-    """Return all lines of filename from the first line up to the last not
-    matching the regex.
-    """
-    lines = []
-    after_regex = False
-    with open(filename) as f:
-        for line in f:
-            if args.carry_regex.match(line) is not None:
-                after_regex = True
-            if not after_regex:
-                lines.append(line)
-    text = ''.join(lines).rstrip()
-    # Keep only a single trailing newline
-    if text:
-        text += '\n\n'
-    return text
-
-
-
-def get_after_regex(filename: str, regex: re.Pattern) -> str:
-    """Return all lines of filename from the first line matching the regex."""
-    lines = []
-    after_regex = False
-    with open(filename) as f:
-        for line in f:
-            if args.carry_regex.match(line) is not None:
-                after_regex = True
-            if after_regex:
-                lines.append(line)
-    return ''.join(lines)
-
-
-
-def show_dates(args: argparse.Namespace) -> None:
-    """Show all the journals for the supplied dates in the user's preferred pager"""
-    # TODO don't start pager() and write directly to stdout if it's not
-    # connected to a terminal
-    try:
-        # Write to the stdin of the pager directly
-        with subprocess.Popen([pager(), '-R'], stdin=subprocess.PIPE, universal_newlines=True) as p:
-            # Create a header with the date range if applicable
-            if len(args.dates) > 1:
-                heading_offset = '##'
-                start_date = args.dates[0].strftime(_date_format_pretty)
-                end_date = args.dates[-1].strftime(_date_format_pretty)
-                header = ''.join(['# ', start_date, ' - ', end_date, '\n\n'])
-                header = header_style(header, args.in_terminal)
-                p.stdin.write(header)
-            else:
-                heading_offset = '#'
-            # Loop over each day and output the contents of the respective file if
-            # it exists
-            for idx, day in enumerate(args.dates):
-                filename = args.filenames[idx]
-                if os.path.exists(filename):
-                    with open(filename) as f:
-                        day_header = ''.join([heading_offset, ' ', day.strftime(_date_format_pretty), '\n\n'])
-                        day_header = day_header_style(day_header, args.in_terminal)
-                        p.stdin.write(day_header)
-                        for line in f:
-                            original_line = line
-                            # Increment the heading levels since we added file
-                            # and per-day headings.
-                            if line.startswith('#'):
-                                line = ''.join([heading_offset, line])
-                            if args.special_pattern.match(original_line) is not None:
-                                line = special_style(line, args.in_terminal)
-                            p.stdin.write(line)
-                        p.stdin.write('\n\n')
-    except BrokenPipeError:
-        # When writing a large amount of data, less will not consume all of it
-        # without scrolling to the bottom and Python will throw a
-        # BrokenPipeError
-        pass
-
-
-
-def edit_date(args: argparse.Namespace) -> None:
-    """Open the journal for a single date in the user's preferred text editor"""
-    if not args.filenames:
-        printerr("No files to edit.")
-        sys.exit(1)
-    # Create the journal directory
-    Path(journal_dir()).mkdir(parents=True, exist_ok=True)
-    filename = args.filenames[0]
-    # Carry over content from prevday
-    should_carry = args.carry_regex is not None
-    if should_carry:
-        prevday_filename = dates_to_files(prev_date(args.suffix), args.suffix)[0]
-        carried_content = get_after_regex(prevday_filename, args.carry_regex)
-        # Append prevday's content to today's file
-        if carried_content:
-            with open(filename, 'a') as f:
-                f.write('\n\n\n')
-                f.write(carried_content)
-        # Remove the carried content from the previous file
-        left_content = get_before_regex(prevday_filename, args.carry_regex)
-        with open(prevday_filename, 'w') as f:
-            f.write(left_content)
-    result = subprocess.run([editor(), filename], stderr=subprocess.PIPE)
-    success = result.returncode == 0
-    if not success:
-        printerr('subprocess error')
-        if result.stdout:
-            print(result.stdout, file=sys.stderr)
-        if result.stderr:
-            print(result.stderr, file=sys.stderr)
-    # Delete the journal file if it's empty
-    remove = False
-    if os.path.isfile(filename):
-        with open(filename) as f:
-            data = f.read().strip()
-            if not data:
-                remove = True
-    if remove:
-        os.remove(filename)
-
-
-
-if __name__ == "__main__":
-    name = os.path.basename(sys.argv[0])
-    if name == 'today':
-        args = parse_today_args(name)
-        if args.view is None:
-            edit_date(args)
-        else:
-            show_dates(args)
-    elif name in ['yesterday', 'tomorrow', 'prevday', 'nextday']:
-        args = parse_common_args(name)
-        edit_date(args)
-    else:
-        args = parse_common_args(name)
-        show_dates(args)
-
+set -eu
+
+usage() {
+	name="${0##*/}"
+	printf 'Usage: %s [[[YYYY-]MM-]DD] ...\n' "$name"
+	printf '       %s prev\n' "$name"
+	printf '       %s -h\n' "$name"
+}
+
+date_file() {
+	printf '%s/%s%s\n' "$TODAY_DIR" "$1" "$TODAY_SUFFIX"
+}
+
+todo_file() {
+	printf '%s/todo%s\n' "$TODAY_DIR" "$TODAY_SUFFIX"
+}
+
+expand_date() {
+	case "$1" in
+		??)
+			printf '%s\n' "$(date '+%Y-%m-')$1"
+			;;
+		??-??)
+			printf '%s\n' "$(date '+%Y-')$1"
+			;;
+		*)
+			printf '%s\n' "$1"
+	esac
+}
+
+valid_date_file() {
+	awk '
+	function year(s) { sub("-..-..$", "", s); return s + 0 }
+	function month(s) { sub("^....-", "", s); sub("-..$", "", s); return s + 0 }
+	function day(s) { sub("^....-..-", "", s); return s + 0 }
+	function is_leap(y) {
+		if (y % 4 != 0) return 0
+		else if (y % 100 != 0) return 1
+		else if (y % 400 != 0) return 0
+		else return 1
+	}
+	function valid_prefix(s) {
+		prefix = "'"$TODAY_DIR/"'"
+		l = length(prefix)
+		return substr(s, 1, l) == prefix
+	}
+	function valid_suffix(s) {
+		suffix = "'"$TODAY_SUFFIX"'"
+		l = length(suffix)
+		return substr(s, length(s) - l + 1) == suffix
+	}
+	BEGIN {
+		days[1] = 31; days[2] = 28; days[3] = 31; days[4] = 30;
+		days[5] = 31; days[6] = 30; days[7] = 31; days[8] = 31;
+		days[9] = 30; days[10] = 31; days[11] = 30; days[12] = 31;
+	}
+	NF != 1 { next }
+	{
+		f = $0
+		if (!valid_prefix(f)) next
+		sub("^.*/", "", f)
+		if (!valid_suffix(f)) next
+		f = substr(f, 1, 10)
+		if (f !~ /^[0-9]{4}-(0[1-9]|1[0-2])-([0-3][0-9])$/) next
+		d = day(f)
+		if (is_leap(year(f))) days[2] = 29; else days[2] = 28
+		if (d < 1 || d > days[month(f)]) next
+		print
+	}'
+}
+
+today_files() {
+	pattern="[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]$TODAY_SUFFIX"
+	find -L "$TODAY_DIR" -type f -name "$pattern" | valid_date_file
+}
+
+today() {
+	date '+%Y-%m-%d'
+}
+
+prevdate() {
+	today_files | sed -e 's|^.*/||' -e 's|\..*$||' | sort -r |
+		awk '$0 < "'"$(today)"'" { print; exit }'
+}
+
+edit_file() {
+	mkdir -p "${1%/*}"
+	TODAY_FILE="$1"
+	# shellcheck disable=SC2034
+	TODAY_TODO=$(todo_file)
+	set +e
+	eval "$TODAY_CMD"
+	set -e
+	# Remove empty files.
+	if [ ! -s "$TODAY_FILE" ]
+	then
+		rm -f "$TODAY_FILE"
+	fi
+	unset -v TODAY_FILE TODAY_TODO
+}
+
+view_files() {
+	cat "$@" | ${PAGER:-less}
+}
+
+
+
+while getopts 'h' option
+do
+	case "$option" in
+		h)
+			usage
+			exit 0
+			;;
+		*)
+			usage >&2
+			exit 2
+			;;
+	esac
+done
+shift "$((OPTIND - 1))"
+
+# shellcheck disable=SC2016
+TODAY_CMD=${TODAY_CMD:-'vim -c "above sp $TODAY_TODO" -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"'}
+TODAY_DIR=${TODAY_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/today}
+TODAY_SUFFIX=${TODAY_SUFFIX-.gmi}
+
+if [ "$#" -eq 0 ]
+then
+	set -- "$(today)"
+elif [ "$#" -eq 1 ] && [ "$1" = 'prev' ]
+then
+	set -- "$(prevdate)"
+fi
+
+files=$(while [ "$#" -gt 0 ]
+do
+	[ -n "$1" ] || continue
+	filename=$(date_file "$(expand_date "$1")")
+	filename=$(printf '%s\n' "$filename" | valid_date_file)
+	if [ -n "$filename" ]
+	then
+		printf '%s\n' "$filename"
+	else
+		printf 'Invalid date: %s\n' "$1" >&2
+		usage >&2
+		exit 2
+	fi
+	shift
+done | sort)
+
+[ -n "$files" ] || return
+if [ "$(printf '%s\n' "$files" | wc -l)" -eq 1 ]
+then
+	edit_file "$files"
+else
+	# shellcheck disable=SC2086
+	view_files $files
+fi

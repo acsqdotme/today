@@ -1,4 +1,4 @@
-today(1) "today 2.1.0"
+today(1) "today 3.0.0"
 
 # NAME
 
@@ -8,99 +8,62 @@ today - keep a daily journal
 
 # SYNOPSIS
 
-*today*     [_OPTION_]... [_YYYYMMDD_]++
-*yesterday* [_OPTION_]...++
-*tomorrow*  [_OPTION_]...++
-*prevday*   [_OPTION_]...++
-*nextday*   [_OPTION_]...++
-*week*      [_OPTION_]...++
-*prevweek*  [_OPTION_]...++
-*nextweek*  [_OPTION_]...++
-*month*     [_OPTION_]...++
-*prevmonth* [_OPTION_]...++
-*nextmonth* [_OPTION_]...
+*today* [[[_YYYY-_]_MM-_]_DD_] ...++
+*today* *prev*++
+*today* *-h*
 
 
 
 # DESCRIPTION
 
-*today* is a Python 3 script that makes it easier to keep a daily journal. It
-creates a file for each day and opens it in your favorite editor. The initial
-motivation was to create an easy to use daily work journal.
+*today* _YYYY-MM-DD_ opens the journal file for the specified date for editing.
+If multiple dates are supplied all respective files are shown in $*PAGER*. With
+no arguments a file with today's date is opened for editing.
 
-*today*/*yesterday*/*tomorrow* opens file YYYYMMDD.md with
-today's/yesterday's/tomorrow's date using _VISUAL_.
+*today* *prev* opens the newest journal file before today for editing.
 
-*today* _YYYYMMDD_ opens the journal file for the specified day instead of
-today.
-
-*prevday* opens the most recent journal file excluding today's file using
-_VISUAL_.
-
-*nextday* opens the closest future journal file using _VISUAL_.
-
-*week*/*prevweek*/*nextweek* renders all the journal files for this/the
-previous/the next week using _PAGER_.
-
-*month*/*prevmonth*/*nextmonth* renders all the journal files for this/the
-previous/the next month using _PAGER_.
-
-If a journal file is empty or contains only whitespace after being edited it
-will be deleted.
-
-The journal files are stored in the first directory among _$TODAY_DIR_,
-_$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists.
+A to-do file is also used for notes that persist between days. If a journal file
+is empty after being edited it's deleted.
 
 
 
-# TODAY OPTIONS
+# OPTIONS
 
-The following options are only available for _today_.
-
-*-c, --carry-regex*=[REGEX]
-	Move all text between the line matching the REGEX and the end of the file
-	inclusive from the _prevday_ to the _today_ file. The default REGEX is
-	*^#+TODO$*.
-
-*-v, --view*=_DATES_
-	View all journal files for the date expression _DATES_. _DATES_ can be
-	_YYYYMMDD_, _START_DATE-_, _-END_DATE_ or _START_DATE-END_DATE_ where
-	_START_DATE_ and _END_DATE_ are in the format _YYYYMMDD_.
-
-# COMMON OPTIONS
-
-*-h, --help*
+*-h*
 	Show the program help.
-
-*-V, --version*
-	Show the program version.
 
 
 
 # ENVIRONMENT VARIABLES
 
-_TODAY_DIR_
-	Overrides the default journal storage directory. The first among
-	_$XDG_DATA_HOME/today_ and _$HOME/.local/share/today_ that exists is used if
-	it is unset.
+*TODAY_CMD*
+	If $*TODAY_CMD* is set, its value is passed to *eval*(1) when editing
+	a journal file. It can be used to customize the command used for editing
+	a journal file. In addition to any environment variables, the following
+	variables can be used in the command stored in $*TODAY_CMD*:
 
-_TODAY_SUFFIX_
-	The journal file suffix. *.md* is used if it is unset.
+	- $*TODAY_FILE*    The path to the journal file to be edited.
+	- $*TODAY_TODO*    The path to the todo file.
+	- $*TODAY_DIR*     See *TODAY_DIR* below. Contains the default value if unset in the environment.
+	- $*TODAY_SUFFIX*  See *TODAY_SUFFIX* below. Contains the default value if unset in the environment.
 
-_TODAY_SPECIAL_REGEX_
-	The regular expression used to highlight special lines. *^#+ TODO$* is used
-	if it is unset.
+	By default the following value is used:
+	```
+	vim -c "abo sp $TODAY_TODO" -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"
+	```
 
-_VISUAL_
-	The editor to use for journal files.
+*TODAY_DIR*
+	If $*TODAY_DIR* is set, its value is the directory where journal files
+	are stored. By default $*XDG_DATA_HOME/today* is used if
+	$*XDG_DATA_HOME* is set, otherwise $*HOME/.local/share/today* is used.
 
-_EDITOR_
-	The editor to use for journal files if _VISUAL_ is unset. *nano* is used if
-	it is unset.
+*TODAY_SUFFIX*
+	If $*TODAY_SUFFIX* is set, its value is the suffix to be added after the
+	date in journal filenames. By default *.gmi* is used.
 
-_PAGER_
-	The pager to use for displaying journal files. *less* is used if it is
-	unset.
+*PAGER*
+	If $*PAGER* is set, its value is used as the program used to display
+	multiple journal files. By default *less* is used.
 
 
 
@@ -113,9 +76,15 @@ Bugs and patches can be submitted by email to
 
 
 
+# SEE ALSO
+
+*eval*(1)
+
+
+
 # LICENSE
 
-Copyright 2020-2021 Sotiris Papatheodorou
+Copyright 2020-2022 Sotiris Papatheodorou
 
 This program is Free Software: You can use, study share and improve it at your
 will. Specifically you can redistribute and/or modify it under the terms of the
@@ -123,6 +92,5 @@ GNU General Public License https://www.gnu.org/licenses/gpl.html as published
 by the Free Software Foundation, either version 3 of the License, or (at your
 option) any later version.
 
-; SPDX-FileCopyrightText: 2020-2021 Sotiris Papatheodorou
+; SPDX-FileCopyrightText: 2020-2022 Sotiris Papatheodorou
 ; SPDX-License-Identifier: GPL-3.0-or-later
-
