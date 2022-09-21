@@ -9,8 +9,11 @@ doc/today.1: doc/today.1.scd
 
 .PHONY: install
 install: doc/today.1
-	install -D -m 755 today $(DESTDIR)$(BINDIR)
-	install -D -m 644 doc/today.1 $(DESTDIR)$(MANDIR)/man1
+	mkdir -p $(DESTDIR)$(BINDIR)
+	cp today $(DESTDIR)$(BINDIR)
+	chmod +x $(DESTDIR)$(BINDIR)/today
+	mkdir -p $(DESTDIR)$(MANDIR)/man1
+	cp doc/today.1 $(DESTDIR)$(MANDIR)/man1
 
 .PHONY: uninstall
 uninstall:
