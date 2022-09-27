@@ -12,24 +12,29 @@ today - keep a daily journal
 *today* *-h*
 
 
-
 # DESCRIPTION
 
-*today* _YYYY-MM-DD_ opens the journal file for the specified date for editing.
-If multiple dates are supplied all respective files are shown in $*PAGER*. With
-no arguments a file with today's date is opened for editing.
+*today* [[[_YYYY-_]_MM-_]_DD_] ... opens the journal file for the specified date
+for editing by running $*TODAY_CMD*. If multiple dates are supplied all
+respective files are shown in $*PAGER*. With no arguments a file with today's
+date is opened for editing. If year and month are omitted they default to the
+current year and month.
 
+A to-do file is used for notes that persist between days.
 
-A to-do file is also used for notes that persist between days. If a journal file
-is empty after being edited it's deleted.
+If a journal file is empty after being edited it's deleted.
 
+Journal files are stored in $*TODAY_DIR* with a _YYYY-MM-DD_ basename and a
+$*TODAY_SUFFIX* suffix. The to-do file is also stored in $*TODAY_DIR* with a
+*todo* basename and a $*TODAY_SUFFIX* suffix.
+
+See the *ENVIRONMENT VARIABLES* section for how to configure *today*.
 
 
 # OPTIONS
 
 *-h*
 	Show the program help.
-
 
 
 # ENVIRONMENT VARIABLES
@@ -61,8 +66,7 @@ is empty after being edited it's deleted.
 
 *PAGER*
 	If $*PAGER* is set, its value is used as the program used to display
-	multiple journal files. By default *less* is used.
-
+	multiple journal files. By default *less*(1) is used.
 
 
 # AUTHOR
@@ -73,11 +77,9 @@ Bugs and patches can be submitted by email to
 ~sotirisp/public-inbox@lists.sr.ht.
 
 
-
 # SEE ALSO
 
-*eval*(1)
-
+*eval*(1), *less*(1)
 
 
 # LICENSE

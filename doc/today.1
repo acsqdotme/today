@@ -20,17 +20,23 @@ today - keep a daily journal
 \fBtoday\fR \fB-h\fR
 .P
 .P
-.P
 .SH DESCRIPTION
 .P
-\fBtoday\fR \fIYYYY-MM-DD\fR opens the journal file for the specified date for editing.
-If multiple dates are supplied all respective files are shown in $\fBPAGER\fR. With
-no arguments a file with today's date is opened for editing.
+\fBtoday\fR [[[\fIYYYY-\fR]\fIMM-\fR]\fIDD\fR] ... opens the journal file for the specified date
+for editing by running $\fBTODAY_CMD\fR. If multiple dates are supplied all
+respective files are shown in $\fBPAGER\fR. With no arguments a file with today's
+date is opened for editing. If year and month are omitted they default to the
+current year and month.
 .P
+A to-do file is used for notes that persist between days.
 .P
-A to-do file is also used for notes that persist between days. If a journal file
-is empty after being edited it's deleted.
+If a journal file is empty after being edited it's deleted.
 .P
+Journal files are stored in $\fBTODAY_DIR\fR with a \fIYYYY-MM-DD\fR basename and a
+$\fBTODAY_SUFFIX\fR suffix. The to-do file is also stored in $\fBTODAY_DIR\fR with a
+\fBtodo\fR basename and a $\fBTODAY_SUFFIX\fR suffix.
+.P
+See the \fBENVIRONMENT VARIABLES\fR section for how to configure \fBtoday\fR.
 .P
 .P
 .SH OPTIONS
@@ -38,7 +44,6 @@ is empty after being edited it's deleted.
 \fB-h\fR
 .RS 4
 Show the program help.
-.P
 .P
 .P
 .RE
@@ -113,8 +118,7 @@ date in journal filenames. By default \fB.gmi\fR is used.
 \fBPAGER\fR
 .RS 4
 If $\fBPAGER\fR is set, its value is used as the program used to display
-multiple journal files. By default \fBless\fR is used.
-.P
+multiple journal files. By default \fBless\fR(1) is used.
 .P
 .P
 .RE
@@ -128,11 +132,9 @@ Bugs and patches can be submitted by email to
 ~sotirisp/public-inbox@lists.sr.ht.
 .P
 .P
-.P
 .SH SEE ALSO
 .P
-\fBeval\fR(1)
-.P
+\fBeval\fR(1), \fBless\fR(1)
 .P
 .P
 .SH LICENSE
