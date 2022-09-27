@@ -1,9 +1,13 @@
 # today
 
 `today` is a POSIX shell script that makes it easier to keep a daily journal.
-It creates a file for each day and opens it in your favorite editor. The
-initial motivation was to create an easy to use daily work journal.
+The motivation for it was creating an easy to use daily work journal.
 
+`today` stores each daily journal as a file whose basename is the corresponding
+date. It allows opening the file with the corresponding date in your favorite
+editor. It also creates a to-do file for notes that persist between days. It's
+configurable through environment variables. This makes it easier to keep
+multiple journals on the same computer.
 
 
 ## Installation
@@ -12,11 +16,19 @@ To install the script and its manpage run `make install`. You might need to run
 it as root.
 
 
-
 ## Usage
 
-See the `today` manpage.
-
+``` sh
+# Open today's journal file.
+today
+# Open the journal file for the 5th of the current month.
+today 05
+# Open the journal file for the 14th of October of the current year.
+today 10-14
+```
+ 
+See the [today(1) manpage](https://git.sr.ht/~sotirisp/today/tree/master/item/doc/today.1.scd)
+for details.
 
 
 ## License
