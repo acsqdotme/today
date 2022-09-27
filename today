@@ -7,7 +7,6 @@ set -eu
 usage() {
 	name="${0##*/}"
 	printf 'Usage: %s [[[YYYY-]MM-]DD] ...\n' "$name"
-	printf '       %s prev\n' "$name"
 	printf '       %s -h\n' "$name"
 }
 
@@ -73,20 +72,6 @@ valid_date_file() {
 	}'
 }
 
-today_files() {
-	pattern="[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]$TODAY_SUFFIX"
-	find -L "$TODAY_DIR" -type f -name "$pattern" | valid_date_file
-}
-
-today() {
-	date '+%Y-%m-%d'
-}
-
-prevdate() {
-	today_files | sed -e 's|^.*/||' -e 's|\..*$||' | sort -r |
-		awk '$0 < "'"$(today)"'" { print; exit }'
-}
-
 edit_file() {
 	mkdir -p "${1%/*}"
 	TODAY_FILE="$1"
@@ -131,10 +116,7 @@ TODAY_SUFFIX=${TODAY_SUFFIX-.gmi}
 
 if [ "$#" -eq 0 ]
 then
-	set -- "$(today)"
-elif [ "$#" -eq 1 ] && [ "$1" = 'prev' ]
-then
-	set -- "$(prevdate)"
+	set -- "$(date '+%Y-%m-%d')"
 fi
 
 files=$(while [ "$#" -gt 0 ]

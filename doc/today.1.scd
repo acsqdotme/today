@@ -9,7 +9,6 @@ today - keep a daily journal
 # SYNOPSIS
 
 *today* [[[_YYYY-_]_MM-_]_DD_] ...++
-*today* *prev*++
 *today* *-h*
 
 
@@ -20,7 +19,6 @@ today - keep a daily journal
 If multiple dates are supplied all respective files are shown in $*PAGER*. With
 no arguments a file with today's date is opened for editing.
 
-*today* *prev* opens the newest journal file before today for editing.
 
 A to-do file is also used for notes that persist between days. If a journal file
 is empty after being edited it's deleted.
