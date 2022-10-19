@@ -1,0 +1,9 @@
+#!/bin/sh
+# today-grep - run grep on all journal files
+# SPDX-FileCopyrightText: 2022 Sotiris Papatheodorou
+# SPDX-License-Identifier: CC0-1.0
+
+TODAY_DIR="${TODAY_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/today}"
+TODAY_SUFFIX="${TODAY_SUFFIX:-.gmi}"
+
+grep "$@" "$TODAY_DIR"/*"$TODAY_SUFFIX"
