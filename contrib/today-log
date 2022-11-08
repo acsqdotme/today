@@ -1,0 +1,17 @@
+#!/bin/sh
+# today-log - concatenate today journals in reverse chronological order
+# SPDX-FileCopyrightText: 2022 Sotiris Papatheodorou
+# SPDX-License-Identifier: CC0-1.0
+
+TODAY_DIR="${TODAY_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/today}"
+TODAY_SUFFIX="${TODAY_SUFFIX:-.gmi}"
+
+find "$TODAY_DIR" -type f -name "*$TODAY_SUFFIX" ! -name "todo$TODAY_SUFFIX" |
+	sort -r | while IFS= read -r f
+do
+	# Add a header with the journal date.
+	printf '# %s\n\n' "$(basename "$f" "$TODAY_SUFFIX")"
+	# Increase the level of other in the journal.
+	sed 's/^#/##/' "$f"
+	printf '\n\n\n'
+done
