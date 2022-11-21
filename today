@@ -73,6 +73,25 @@ valid_date_file() {
 	}'
 }
 
+dates_to_files() {
+	filenames=''
+	while [ "$#" -gt 0 ]
+	do
+		[ -n "$1" ] || continue
+		filename=$(date_file "$(expand_date "$1")")
+		filename=$(printf '%s\n' "$filename" | valid_date_file)
+		if [ -n "$filename" ]
+		then
+			filenames=$(printf '%s\n%s' "$filenames" "$filename")
+		else
+			printf 'Invalid date: %s\n' "$1" >&2
+			return 2
+		fi
+		shift
+	done
+	printf '%s' "$filenames" | sort
+}
+
 edit_file() {
 	mkdir -p "${1%/*}"
 	TODAY_FILE="$1"
@@ -99,21 +118,6 @@ view_files() {
 
 
 
-while getopts 'h' option
-do
-	case "$option" in
-		h)
-			usage
-			exit 0
-			;;
-		*)
-			usage >&2
-			exit 2
-			;;
-	esac
-done
-shift "$((OPTIND - 1))"
-
 # shellcheck disable=SC2016
 TODAY_CMD=${TODAY_CMD:-'vim -c "above sp $TODAY_TODO" -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"'}
 TODAY_DIR=${TODAY_DIR-${XDG_DATA_HOME:-${HOME}/.local/share}/today}
@@ -124,34 +128,29 @@ then
 	set -- "$(date '+%Y-%m-%d')"
 fi
 
-if [ "$1" = 'grep' ]
-then
-	shift
-	search_files "$@"
-	return
-fi
-
-files=$(while [ "$#" -gt 0 ]
-do
-	[ -n "$1" ] || continue
-	filename=$(date_file "$(expand_date "$1")")
-	filename=$(printf '%s\n' "$filename" | valid_date_file)
-	if [ -n "$filename" ]
-	then
-		printf '%s\n' "$filename"
-	else
-		printf 'Invalid date: %s\n' "$1" >&2
-		usage >&2
-		exit 2
-	fi
-	shift
-done | sort)
-
-[ -n "$files" ] || return
-if [ "$(printf '%s\n' "$files" | wc -l)" -eq 1 ]
-then
-	edit_file "$files"
-else
-	# shellcheck disable=SC2086
-	view_files $files
-fi
+case "$1" in
+	grep)
+		shift
+		search_files "$@"
+		;;
+	-h)
+		usage
+		;;
+	*)
+		# shellcheck disable=SC2046
+		set -- $(dates_to_files "$@")
+		case "$#" in
+			0)
+				# Invalid date argument.
+				usage >&2
+				exit 2
+				;;
+			1)
+				edit_file "$1"
+				;;
+			*)
+				view_files "$@"
+				;;
+		esac
+		;;
+esac
