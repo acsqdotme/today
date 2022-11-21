@@ -7,6 +7,7 @@ set -eu
 usage() {
 	name="${0##*/}"
 	printf 'Usage: %s [[[YYYY-]MM-]DD] ...\n' "$name"
+	printf '       %s grep ARGUMENT ...\n' "$name"
 	printf '       %s -h\n' "$name"
 }
 
@@ -88,6 +89,10 @@ edit_file() {
 	unset -v TODAY_FILE TODAY_TODO
 }
 
+search_files() {
+	grep "$@" "$TODAY_DIR"/*"$TODAY_SUFFIX"
+}
+
 view_files() {
 	cat "$@" | ${PAGER:-less}
 }
@@ -117,6 +122,13 @@ TODAY_SUFFIX=${TODAY_SUFFIX-.gmi}
 if [ "$#" -eq 0 ]
 then
 	set -- "$(date '+%Y-%m-%d')"
+fi
+
+if [ "$1" = 'grep' ]
+then
+	shift
+	search_files "$@"
+	return
 fi
 
 files=$(while [ "$#" -gt 0 ]

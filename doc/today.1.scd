@@ -5,10 +5,10 @@ today(1) "today 4.0.0"
 today - keep a daily journal
 
 
-
 # SYNOPSIS
 
 *today* [[[_YYYY-_]_MM-_]_DD_] ...++
+*today* *grep* _argument_ ...++
 *today* *-h*
 
 
@@ -19,6 +19,9 @@ for editing by running $*TODAY_CMD*. If multiple dates are supplied all
 respective files are shown in $*PAGER*. With no arguments a file with today's
 date is opened for editing. If year and month are omitted they default to the
 current year and month.
+
+*today* *grep* _argument_ ... searches through all journal files by calling
+*grep*(1) with the supplied _argument_\s.
 
 A to-do file is used for notes that persist between days.
 
@@ -79,7 +82,7 @@ Bugs and patches can be submitted by email to
 
 # SEE ALSO
 
-*eval*(1), *less*(1)
+*eval*(1), *grep*(1), *less*(1)
 
 
 # LICENSE
