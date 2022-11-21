@@ -17,3 +17,6 @@ install: doc/today.1
 
 uninstall:
 	rm -f $(BINDIR)/today $(MANDIR)/man1/today.1
+
+clean:
+	rm -f doc/today.1

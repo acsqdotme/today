@@ -12,8 +12,9 @@ multiple journals on the same computer.
 
 ## Installation
 
-To install the script and its manpage run `make install`. You might need to run
-it as root.
+The dependencies are a POSIX system and `scdoc` to build the manpage. To build
+the manpage run `make`. To install the script and its manpage run `make
+install`. You might need to run it as root.
 
 
 ## Usage
