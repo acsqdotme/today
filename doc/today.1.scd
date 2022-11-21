@@ -68,7 +68,7 @@ in $*TODAY_DIR* with a *todo* basename and a $*TODAY_SUFFIX* suffix.
 
 *PAGER*
 	The program to which the output of *today* *log* is piped. Defaults to
-	*less*(1) if unset or empty.
+	*more*(1) if unset or empty.
 
 
 # AUTHOR
@@ -81,7 +81,7 @@ Bugs and patches can be submitted by email to
 
 # SEE ALSO
 
-*eval*(1), *grep*(1), *less*(1)
+*eval*(1), *grep*(1), *more*(1)
 
 
 # LICENSE

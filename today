@@ -94,7 +94,7 @@ search_files() {
 }
 
 view_files() {
-	cat "$@" | ${PAGER:-less}
+	cat "$@" | ${PAGER:-more}
 }
 
 
