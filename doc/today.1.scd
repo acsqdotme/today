@@ -7,22 +7,27 @@ today - keep a daily journal
 
 # SYNOPSIS
 
-*today* [[[_YYYY-_]_MM-_]_DD_] ...++
+*today* [[[_YYYY-_]_MM-_]_DD_]++
 *today* *grep* _argument_ ...++
+*today* *log* [*-v*]++
 *today* *-h*
 
 
 # DESCRIPTION
 
-*today* [[[_YYYY-_]_MM-_]_DD_] ... opens the journal file for the specified date
-for editing by running the command in the $*TODAY_CMD* environment variable. If
-year and month are omitted they default to the current year and month. If
-multiple dates are supplied all respective files are shown in $*PAGER* in
-chronological order. With no arguments a file with the current date is opened
-for editing.
+*today* [[[_YYYY-_]_MM-_]_DD_] opens the journal file for the specified date for
+editing by running the command in the $*TODAY_CMD* environment variable. If year
+and month are omitted they default to the current year and month. With no
+arguments a file with the current date is opened for editing.
 
 *today* *grep* _argument_ ... searches through all journal files by calling
 *grep*(1) with the supplied _argument_\s.
+
+*today* *log* prints the contents of all journal files in reverse chronological
+order on standard output. The contents of each file are preceded by the date in
+the YYYY-MM-DD format and two newlines and followed by three newlines. If
+standard output is connected to a terminal it will be piped to the program
+specified in the $*PAGER* environment variable.
 
 A to-do file is used for notes that persist between days.
 
@@ -35,6 +40,10 @@ in $*TODAY_DIR* with a *todo* basename and a $*TODAY_SUFFIX* suffix.
 
 
 # OPTIONS
+
+*-v*
+	Reverse the file ordering in the *log* subcommand, i.e. print the
+	contents of all journal files in chronological order.
 
 *-h*
 	Show the program help.

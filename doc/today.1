@@ -14,24 +14,30 @@ today - keep a daily journal
 .P
 .SH SYNOPSIS
 .P
-\fBtoday\fR [[[\fIYYYY-\fR]\fIMM-\fR]\fIDD\fR] .\&.\&.\&
+\fBtoday\fR [[[\fIYYYY-\fR]\fIMM-\fR]\fIDD\fR]
 .br
 \fBtoday\fR \fBgrep\fR \fIargument\fR .\&.\&.\&
+.br
+\fBtoday\fR \fBlog\fR [\fB-v\fR]
 .br
 \fBtoday\fR \fB-h\fR
 .P
 .P
 .SH DESCRIPTION
 .P
-\fBtoday\fR [[[\fIYYYY-\fR]\fIMM-\fR]\fIDD\fR] .\&.\&.\& opens the journal file for the specified date
-for editing by running the command in the $\fBTODAY_CMD\fR environment variable.\& If
-year and month are omitted they default to the current year and month.\& If
-multiple dates are supplied all respective files are shown in $\fBPAGER\fR in
-chronological order.\& With no arguments a file with the current date is opened
-for editing.\&
+\fBtoday\fR [[[\fIYYYY-\fR]\fIMM-\fR]\fIDD\fR] opens the journal file for the specified date for
+editing by running the command in the $\fBTODAY_CMD\fR environment variable.\& If year
+and month are omitted they default to the current year and month.\& With no
+arguments a file with the current date is opened for editing.\&
 .P
 \fBtoday\fR \fBgrep\fR \fIargument\fR .\&.\&.\& searches through all journal files by calling
 \fBgrep\fR(1) with the supplied \fIargument\fRs.\&
+.P
+\fBtoday\fR \fBlog\fR prints the contents of all journal files in reverse chronological
+order on standard output.\& The contents of each file are preceded by the date in
+the YYYY-MM-DD format and two newlines and followed by three newlines.\& If
+standard output is connected to a terminal it will be piped to the program
+specified in the $\fBPAGER\fR environment variable.\&
 .P
 A to-do file is used for notes that persist between days.\&
 .P
@@ -45,6 +51,12 @@ in $\fBTODAY_DIR\fR with a \fBtodo\fR basename and a $\fBTODAY_SUFFIX\fR suffix.
 .P
 .SH OPTIONS
 .P
+\fB-v\fR
+.RS 4
+Reverse the file ordering in the \fBlog\fR subcommand, i.\&e.\& print the
+contents of all journal files in chronological order.\&
+.P
+.RE
 \fB-h\fR
 .RS 4
 Show the program help.\&
