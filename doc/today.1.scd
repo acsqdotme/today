@@ -15,10 +15,11 @@ today - keep a daily journal
 # DESCRIPTION
 
 *today* [[[_YYYY-_]_MM-_]_DD_] ... opens the journal file for the specified date
-for editing by running $*TODAY_CMD*. If multiple dates are supplied all
-respective files are shown in $*PAGER*. With no arguments a file with today's
-date is opened for editing. If year and month are omitted they default to the
-current year and month.
+for editing by running the command in the $*TODAY_CMD* environment variable. If
+year and month are omitted they default to the current year and month. If
+multiple dates are supplied all respective files are shown in $*PAGER* in
+chronological order. With no arguments a file with the current date is opened
+for editing.
 
 *today* *grep* _argument_ ... searches through all journal files by calling
 *grep*(1) with the supplied _argument_\s.
@@ -27,11 +28,10 @@ A to-do file is used for notes that persist between days.
 
 If a journal file is empty after being edited it's deleted.
 
-Journal files are stored in $*TODAY_DIR* with a _YYYY-MM-DD_ basename and a
-$*TODAY_SUFFIX* suffix. The to-do file is also stored in $*TODAY_DIR* with a
-*todo* basename and a $*TODAY_SUFFIX* suffix.
-
-See the *ENVIRONMENT VARIABLES* section for how to configure *today*.
+Journal files are stored in the directory specified in the $*TODAY_DIR*
+environment variable with a _YYYY-MM-DD_ basename and the contents of the
+$*TODAY_SUFFIX* environment variables as a suffix. The to-do file is also stored
+in $*TODAY_DIR* with a *todo* basename and a $*TODAY_SUFFIX* suffix.
 
 
 # OPTIONS
@@ -43,33 +43,32 @@ See the *ENVIRONMENT VARIABLES* section for how to configure *today*.
 # ENVIRONMENT VARIABLES
 
 *TODAY_CMD*
-	If $*TODAY_CMD* is set, its value is passed to *eval*(1) when editing
-	a journal file. It can be used to customize the command used for editing
-	a journal file. In addition to any environment variables, the following
-	variables can be used in the command stored in $*TODAY_CMD*:
+	The command used to edit a journal file. It is passed to *eval*(1). In
+	addition to any environment variables, the following variables can be
+	used in the command stored in $*TODAY_CMD*:
 
 	- $*TODAY_FILE*    The path to the journal file to be edited.
-	- $*TODAY_TODO*    The path to the todo file.
-	- $*TODAY_DIR*     See *TODAY_DIR* below. Contains the default value if unset in the environment.
-	- $*TODAY_SUFFIX*  See *TODAY_SUFFIX* below. Contains the default value if unset in the environment.
+	- $*TODAY_TODO*    The path to the to-do file.
+	- $*TODAY_DIR*     See *TODAY_DIR*. Contains the default value if unset in the environment.
+	- $*TODAY_SUFFIX*  See *TODAY_SUFFIX*. Contains the default value if unset in the environment.
 
-	By default the following value is used:
+	If unset or empty the following value is used:
 	```
 	vim -c "abo sp $TODAY_TODO" -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"
 	```
 
 *TODAY_DIR*
-	If $*TODAY_DIR* is set, its value is the directory where journal files
-	are stored. By default $*XDG_DATA_HOME/today* is used if
-	$*XDG_DATA_HOME* is set, otherwise $*HOME/.local/share/today* is used.
+	The directory where journal files are stored. If unset it defaults to
+	$*XDG_DATA_HOME/today* if $*XDG_DATA_HOME* is set or
+	$*HOME/.local/share/today* otherwise.
 
 *TODAY_SUFFIX*
-	If $*TODAY_SUFFIX* is set, its value is the suffix to be added after the
-	date in journal filenames. By default *.gmi* is used.
+	The suffix added after the date in journal filenames. Defaults to *.gmi*
+	if unset.
 
 *PAGER*
-	If $*PAGER* is set, its value is used as the program used to display
-	multiple journal files. By default *less*(1) is used.
+	The program to which the output of *today* *log* is piped. Defaults to
+	*less*(1) if unset or empty.
 
 
 # AUTHOR

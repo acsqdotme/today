@@ -24,10 +24,11 @@ today - keep a daily journal
 .SH DESCRIPTION
 .P
 \fBtoday\fR [[[\fIYYYY-\fR]\fIMM-\fR]\fIDD\fR] .\&.\&.\& opens the journal file for the specified date
-for editing by running $\fBTODAY_CMD\fR.\& If multiple dates are supplied all
-respective files are shown in $\fBPAGER\fR.\& With no arguments a file with today's
-date is opened for editing.\& If year and month are omitted they default to the
-current year and month.\&
+for editing by running the command in the $\fBTODAY_CMD\fR environment variable.\& If
+year and month are omitted they default to the current year and month.\& If
+multiple dates are supplied all respective files are shown in $\fBPAGER\fR in
+chronological order.\& With no arguments a file with the current date is opened
+for editing.\&
 .P
 \fBtoday\fR \fBgrep\fR \fIargument\fR .\&.\&.\& searches through all journal files by calling
 \fBgrep\fR(1) with the supplied \fIargument\fRs.\&
@@ -36,11 +37,10 @@ A to-do file is used for notes that persist between days.\&
 .P
 If a journal file is empty after being edited it's deleted.\&
 .P
-Journal files are stored in $\fBTODAY_DIR\fR with a \fIYYYY-MM-DD\fR basename and a
-$\fBTODAY_SUFFIX\fR suffix.\& The to-do file is also stored in $\fBTODAY_DIR\fR with a
-\fBtodo\fR basename and a $\fBTODAY_SUFFIX\fR suffix.\&
-.P
-See the \fBENVIRONMENT VARIABLES\fR section for how to configure \fBtoday\fR.\&
+Journal files are stored in the directory specified in the $\fBTODAY_DIR\fR
+environment variable with a \fIYYYY-MM-DD\fR basename and the contents of the
+$\fBTODAY_SUFFIX\fR environment variables as a suffix.\& The to-do file is also stored
+in $\fBTODAY_DIR\fR with a \fBtodo\fR basename and a $\fBTODAY_SUFFIX\fR suffix.\&
 .P
 .P
 .SH OPTIONS
@@ -55,10 +55,9 @@ Show the program help.\&
 .P
 \fBTODAY_CMD\fR
 .RS 4
-If $\fBTODAY_CMD\fR is set, its value is passed to \fBeval\fR(1) when editing
-a journal file.\& It can be used to customize the command used for editing
-a journal file.\& In addition to any environment variables, the following
-variables can be used in the command stored in $\fBTODAY_CMD\fR:
+The command used to edit a journal file.\& It is passed to \fBeval\fR(1).\& In
+addition to any environment variables, the following variables can be
+used in the command stored in $\fBTODAY_CMD\fR:
 .P
 .RS 4
 .ie n \{\
@@ -76,7 +75,7 @@ $\fBTODAY_FILE\fR    The path to the journal file to be edited.\&
 .el \{\
 .IP \(bu 4
 .\}
-$\fBTODAY_TODO\fR    The path to the todo file.\&
+$\fBTODAY_TODO\fR    The path to the to-do file.\&
 .RE
 .RS 4
 .ie n \{\
@@ -85,7 +84,7 @@ $\fBTODAY_TODO\fR    The path to the todo file.\&
 .el \{\
 .IP \(bu 4
 .\}
-$\fBTODAY_DIR\fR     See \fBTODAY_DIR\fR below.\& Contains the default value if unset in the environment.\&
+$\fBTODAY_DIR\fR     See \fBTODAY_DIR\fR.\& Contains the default value if unset in the environment.\&
 .RE
 .RS 4
 .ie n \{\
@@ -94,11 +93,11 @@ $\fBTODAY_DIR\fR     See \fBTODAY_DIR\fR below.\& Contains the default value if 
 .el \{\
 .IP \(bu 4
 .\}
-$\fBTODAY_SUFFIX\fR  See \fBTODAY_SUFFIX\fR below.\& Contains the default value if unset in the environment.\&
+$\fBTODAY_SUFFIX\fR  See \fBTODAY_SUFFIX\fR.\& Contains the default value if unset in the environment.\&
 
 .RE
 .P
-By default the following value is used:
+If unset or empty the following value is used:
 .nf
 .RS 4
 vim -c "abo sp $TODAY_TODO" -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"
@@ -108,21 +107,21 @@ vim -c "abo sp $TODAY_TODO" -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"
 .RE
 \fBTODAY_DIR\fR
 .RS 4
-If $\fBTODAY_DIR\fR is set, its value is the directory where journal files
-are stored.\& By default $\fBXDG_DATA_HOME/today\fR is used if
-$\fBXDG_DATA_HOME\fR is set, otherwise $\fBHOME/.\&local/share/today\fR is used.\&
+The directory where journal files are stored.\& If unset it defaults to
+$\fBXDG_DATA_HOME/today\fR if $\fBXDG_DATA_HOME\fR is set or
+$\fBHOME/.\&local/share/today\fR otherwise.\&
 .P
 .RE
 \fBTODAY_SUFFIX\fR
 .RS 4
-If $\fBTODAY_SUFFIX\fR is set, its value is the suffix to be added after the
-date in journal filenames.\& By default \fB.\&gmi\fR is used.\&
+The suffix added after the date in journal filenames.\& Defaults to \fB.\&gmi\fR
+if unset.\&
 .P
 .RE
 \fBPAGER\fR
 .RS 4
-If $\fBPAGER\fR is set, its value is used as the program used to display
-multiple journal files.\& By default \fBless\fR(1) is used.\&
+The program to which the output of \fBtoday\fR \fBlog\fR is piped.\& Defaults to
+\fBless\fR(1) if unset or empty.\&
 .P
 .P
 .RE
