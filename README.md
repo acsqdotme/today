@@ -25,6 +25,10 @@ today
 today 05
 # Open the journal file for the 14th of October of the current year.
 today 10-14
+# Search all journal files using the regular expression "^Today".
+today grep ^Today
+# Show the contents of all journal files in a pager.
+today log
 ```
  
 See the [today(1) manpage](https://git.sr.ht/~sotirisp/today/tree/master/item/doc/today.1.scd)
