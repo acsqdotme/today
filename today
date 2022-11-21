@@ -116,7 +116,7 @@ shift "$((OPTIND - 1))"
 
 # shellcheck disable=SC2016
 TODAY_CMD=${TODAY_CMD:-'vim -c "above sp $TODAY_TODO" -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"'}
-TODAY_DIR=${TODAY_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/today}
+TODAY_DIR=${TODAY_DIR-${XDG_DATA_HOME:-${HOME}/.local/share}/today}
 TODAY_SUFFIX=${TODAY_SUFFIX-.gmi}
 
 if [ "$#" -eq 0 ]
