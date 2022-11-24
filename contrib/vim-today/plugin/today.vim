@@ -15,5 +15,5 @@ if empty($TODAY_DIR)
 endif
 
 if empty($TODAY_SUFFIX)
-	let $TODAY_SUFFIX = '.gmi'
+	let $TODAY_SUFFIX = '.md'
 endif

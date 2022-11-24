@@ -72,7 +72,7 @@ in $*TODAY_DIR* with a *todo* basename and a $*TODAY_SUFFIX* suffix.
 	$*HOME/.local/share/today* otherwise.
 
 *TODAY_SUFFIX*
-	The suffix added after the date in journal filenames. Defaults to *.gmi*
+	The suffix added after the date in journal filenames. Defaults to *.md*
 	if unset.
 
 *PAGER*
