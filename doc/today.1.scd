@@ -80,17 +80,16 @@ in $*TODAY_DIR* with a *todo* basename and a $*TODAY_SUFFIX* suffix.
 	*more*(1) if unset or empty.
 
 
-# AUTHOR
-
-Written and maintained by Sotiris Papatheodorou.++
-Up-to-date sources can be found at https://git.sr.ht/~sotirisp/today.++
-Bugs and patches can be submitted by email to
-~sotirisp/public-inbox@lists.sr.ht.
-
-
 # SEE ALSO
 
 *eval*(1), *grep*(1), *more*(1)
+
+
+# AUTHOR
+
+Written and maintained by Sotiris Papatheodorou. Up-to-date sources can be found
+at https://sr.ht/~sotirisp/today. Bugs and patches can be submitted by email to
+~sotirisp/today@lists.sr.ht.
 
 
 # LICENSE

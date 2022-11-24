@@ -36,6 +36,14 @@ See the [today(1) manpage](https://git.sr.ht/~sotirisp/today/tree/master/item/do
 for details.
 
 
+## Contributing
+
+Patches, bug reports or feature suggestions can be sent by email to
+[~sotirisp/today@lists.sr.ht](mailto:~sotirisp/today@lists.sr.ht). If you're
+not familiar with sending patches over email see
+[here](https://git-send-email.io/).
+
+
 ## License
 
 Copyright 2020-2022 Sotiris Papatheodorou
