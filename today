@@ -13,14 +13,9 @@ usage() {
 	printf '       %s -h\n' "$name"
 }
 
-date_file() {
-	printf '%s/%s%s\n' "$TODAY_DIR" "$1" "$TODAY_SUFFIX"
-}
-
-todo_file() {
-	printf '%s/todo%s\n' "$TODAY_DIR" "$TODAY_SUFFIX"
-}
-
+# Usage: expand_date DATE
+# Expand a date in the format DD or MM-DD to YYYY-MM-DD using the current month
+# and year.
 expand_date() {
 	case "$1" in
 		??)
@@ -31,10 +26,35 @@ expand_date() {
 			;;
 		*)
 			printf '%s\n' "$1"
+			;;
 	esac
 }
 
-valid_date_file() {
+# Usage: journal_file DATE
+# Print the filename of the journal file for DATE.
+journal_file() {
+	printf '%s/%s%s\n' "$TODAY_DIR" "$(expand_date "$1")" "$TODAY_SUFFIX" |
+		valid_journal_files
+}
+
+# Usage: journal_files
+# Print the filenames of all journal files, one per line.
+journal_files() {
+	find "$TODAY_DIR" ! -path "$TODAY_DIR" -prune -type f |
+		valid_journal_files
+}
+
+# Usage: todo_file
+# Print the filename of the to-do file.
+todo_file() {
+	printf '%s/todo%s\n' "$TODAY_DIR" "$TODAY_SUFFIX"
+}
+
+# Usage: valid_journal_files
+# Read filenames from standard input and print only those that correspond to
+# valid today journals on standard output. Checks that the files are in
+# $TODAY_DIR, end with $TODAY_SUFFIX and that their basename is a valid date.
+valid_journal_files() {
 	awk '
 	function year(s) { sub("-..-..$", "", s); return s + 0 }
 	function month(s) { sub("^....-", "", s); sub("-..$", "", s); return s + 0 }
@@ -47,13 +67,11 @@ valid_date_file() {
 	}
 	function valid_prefix(s) {
 		prefix = "'"$TODAY_DIR/"'"
-		l = length(prefix)
-		return substr(s, 1, l) == prefix
+		return substr(s, 1, length(prefix)) == prefix
 	}
 	function valid_suffix(s) {
 		suffix = "'"$TODAY_SUFFIX"'"
-		l = length(suffix)
-		return substr(s, length(s) - l + 1) == suffix
+		return substr(s, length(s) - length(suffix) + 1) == suffix
 	}
 	BEGIN {
 		days[1] = 31; days[2] = 28; days[3] = 31; days[4] = 30;
@@ -82,15 +100,14 @@ edit_file() {
 		usage >&2
 		return 2
 	fi
-	filename=$(date_file "$(expand_date "$1")" | valid_date_file)
-	if [ -z "$filename" ]
+	TODAY_FILE=$(journal_file "$1")
+	if [ -z "$TODAY_FILE" ]
 	then
 		printf 'Invalid date: %s\n' "$1" >&2
 		usage >&2
 		return 2
 	fi
-	mkdir -p "${filename%/*}"
-	TODAY_FILE="$filename"
+	mkdir -p "${TODAY_FILE%/*}"
 	# shellcheck disable=SC2034
 	TODAY_TODO=$(todo_file)
 	set +e
@@ -101,11 +118,18 @@ edit_file() {
 	then
 		rm -f "$TODAY_FILE"
 	fi
+	unset -v TODAY_FILE TODAY_TODO
 }
 
-search_files() {
-	grep "$@" "$TODAY_DIR"/*"$TODAY_SUFFIX"
-}
+search_files() (
+	# Disable globbing and split fields only on newlines to allow passing
+	# journal filenames with spaces to grep.
+	set -f
+	IFS='
+	'
+	# shellcheck disable=SC2046
+	grep "$@" "$(todo_file)" $(journal_files)
+)
 
 view_files() {
 	case "$#" in
@@ -128,14 +152,14 @@ view_files() {
 			return 2
 			;;
 	esac
-	pat="[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$TODAY_SUFFIX"
-	find "$TODAY_DIR" -type f -name "$pat" | sort "$sort_args" |
-		while IFS= read -r f
+	# shellcheck disable=SC2086
+	journal_files | sort $sort_args | while IFS= read -r f
 	do
 		printf '%s\n\n' "$(basename "$f" "$TODAY_SUFFIX")"
 		cat "$f"
 		printf '\n\n\n'
 	done | pager_if_terminal
+	unset -v sort_args
 }
 
 pager_if_terminal() {
