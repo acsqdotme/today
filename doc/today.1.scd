@@ -1,4 +1,4 @@
-today(1) "today 5.1.0"
+today(1) "today 5.2.0"
 
 # NAME
 

@@ -6,7 +6,7 @@ set -eu
 
 usage() {
 	name="${0##*/}"
-	printf '%s v5.1.0\n' "$name"
+	printf '%s v5.2.0\n' "$name"
 	printf 'Usage: %s [[[YYYY-]MM-]DD]\n' "$name"
 	printf '       %s grep ARGUMENT ...\n' "$name"
 	printf '       %s log [-v]\n' "$name"
