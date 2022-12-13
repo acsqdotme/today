@@ -35,7 +35,7 @@ If a journal file is empty after being edited it's deleted.
 
 Journal files are stored in the directory specified in the $*TODAY_DIR*
 environment variable with a _YYYY-MM-DD_ basename and the contents of the
-$*TODAY_SUFFIX* environment variables as a suffix. The to-do file is also stored
+$*TODAY_SUFFIX* environment variable as a suffix. The to-do file is also stored
 in $*TODAY_DIR* with a *todo* basename and a $*TODAY_SUFFIX* suffix.
 
 
