@@ -4,14 +4,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 set -eu
 
-usage() {
+usage() (
 	name="${0##*/}"
 	printf '%s v5.2.1\n' "$name"
 	printf 'Usage: %s [[[YYYY-]MM-]DD]\n' "$name"
 	printf '       %s grep ARGUMENT ...\n' "$name"
 	printf '       %s log [-v]\n' "$name"
 	printf '       %s -h\n' "$name"
-}
+)
 
 # Usage: expand_date DATE
 # Expand a date in the format DD or MM-DD to YYYY-MM-DD using the current month
@@ -93,7 +93,7 @@ valid_journal_files() {
 	}'
 }
 
-edit_file() {
+edit_file() (
 	if [ "$#" -gt 1 ]
 	then
 		printf 'Too many arguments\n' >&2
@@ -118,8 +118,7 @@ edit_file() {
 	then
 		rm -f "$TODAY_FILE"
 	fi
-	unset -v TODAY_FILE TODAY_TODO
-}
+)
 
 search_files() (
 	# Disable globbing and split fields only on newlines to allow passing
@@ -131,7 +130,7 @@ search_files() (
 	grep "$@" "$(todo_file)" $(journal_files)
 )
 
-view_files() {
+view_files() (
 	case "$#" in
 		0)
 			sort_args='-r'
@@ -159,8 +158,7 @@ view_files() {
 		cat "$f"
 		printf '\n\n\n'
 	done | pager_if_terminal
-	unset -v sort_args
-}
+)
 
 pager_if_terminal() {
 	if [ -t 1 ]
