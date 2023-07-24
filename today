@@ -181,11 +181,11 @@ then
 fi
 
 case "$1" in
-	g|grep)
+	g|gr|gre|grep)
 		shift
 		search_files "$@"
 		;;
-	l|log)
+	l|lo|log)
 		shift
 		view_files "$@"
 		;;
