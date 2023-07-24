@@ -1,6 +1,6 @@
 #!/bin/sh
 # today - keep a daily journal
-# SPDX-FileCopyrightText: 2022 Sotiris Papatheodorou
+# SPDX-FileCopyrightText: 2022-2023 Sotiris Papatheodorou
 # SPDX-License-Identifier: GPL-3.0-or-later
 set -eu
 
@@ -55,7 +55,7 @@ todo_file() {
 # valid today journals on standard output. Checks that the files are in
 # $TODAY_DIR, end with $TODAY_SUFFIX and that their basename is a valid date.
 valid_journal_files() {
-	awk '
+	awk -v prefix="$TODAY_DIR/" -v suffix="$TODAY_SUFFIX" '
 	function year(s) { sub("-..-..$", "", s); return s + 0 }
 	function month(s) { sub("^....-", "", s); sub("-..$", "", s); return s + 0 }
 	function day(s) { sub("^....-..-", "", s); return s + 0 }
@@ -66,11 +66,9 @@ valid_journal_files() {
 		else return 1
 	}
 	function valid_prefix(s) {
-		prefix = "'"$TODAY_DIR/"'"
 		return substr(s, 1, length(prefix)) == prefix
 	}
 	function valid_suffix(s) {
-		suffix = "'"$TODAY_SUFFIX"'"
 		return substr(s, length(s) - length(suffix) + 1) == suffix
 	}
 	BEGIN {
