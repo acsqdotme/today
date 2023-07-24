@@ -75,14 +75,15 @@ valid_journal_files() {
 		days[1] = 31; days[2] = 28; days[3] = 31; days[4] = 30;
 		days[5] = 31; days[6] = 30; days[7] = 31; days[8] = 31;
 		days[9] = 30; days[10] = 31; days[11] = 30; days[12] = 31;
+		gsub("/+", "/", prefix)
 	}
 	NF != 1 { next }
 	{
 		f = $0
 		if (!valid_prefix(f)) next
-		sub("^.*/", "", f)
+		f = substr(f, length(prefix) + 1)
 		if (!valid_suffix(f)) next
-		f = substr(f, 1, 10)
+		f = substr(f, 1, length(f) - length(suffix))
 		if (f !~ /^[0-9]{4}-(0[1-9]|1[0-2])-([0-3][0-9])$/) next
 		d = day(f)
 		if (is_leap(year(f))) days[2] = 29; else days[2] = 28
