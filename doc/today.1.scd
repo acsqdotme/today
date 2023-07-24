@@ -1,4 +1,4 @@
-today(1) "today 5.3.0"
+today(1) "today 5.3.1"
 
 # NAME
 
@@ -94,7 +94,7 @@ at https://sr.ht/~sotirisp/today. Bugs and patches can be submitted by email to
 
 # LICENSE
 
-Copyright 2020-2022 Sotiris Papatheodorou
+Copyright 2020-2023 Sotiris Papatheodorou
 
 This program is Free Software: You can use, study share and improve it at your
 will. Specifically you can redistribute and/or modify it under the terms of the
@@ -102,5 +102,5 @@ GNU General Public License https://www.gnu.org/licenses/gpl.html as published
 by the Free Software Foundation, either version 3 of the License, or (at your
 option) any later version.
 
-; SPDX-FileCopyrightText: 2020-2022 Sotiris Papatheodorou
+; SPDX-FileCopyrightText: 2020-2023 Sotiris Papatheodorou
 ; SPDX-License-Identifier: GPL-3.0-or-later
