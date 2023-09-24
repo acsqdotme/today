@@ -2,8 +2,7 @@
 
 `today` is a POSIX shell script for keeping a daily journal. Each daily journal
 is stored as a file whose basename is the corresponding date. It allows
-editing, searching through and viewing journal files. There's also a to-do file
-for notes that persist between days.
+editing, searching through and viewing journal files.
 
 
 ## Usage

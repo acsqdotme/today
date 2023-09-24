@@ -29,14 +29,11 @@ the YYYY-MM-DD format and two newlines and followed by three newlines. If
 standard output is connected to a terminal it will be piped to the program
 specified in the $*PAGER* environment variable.
 
-A to-do file is used for notes that persist between days.
-
 If a journal file is empty after being edited it's deleted.
 
 Journal files are stored in the directory specified in the $*TODAY_DIR*
 environment variable with a _YYYY-MM-DD_ basename and the contents of the
-$*TODAY_SUFFIX* environment variable as a suffix. The to-do file is also stored
-in $*TODAY_DIR* with a *todo* basename and a $*TODAY_SUFFIX* suffix.
+$*TODAY_SUFFIX* environment variable as a suffix.
 
 
 # OPTIONS
@@ -57,13 +54,14 @@ in $*TODAY_DIR* with a *todo* basename and a $*TODAY_SUFFIX* suffix.
 	used in the command stored in $*TODAY_CMD*:
 
 	- $*TODAY_FILE*    The path to the journal file to be edited.
-	- $*TODAY_TODO*    The path to the to-do file.
 	- $*TODAY_DIR*     See *TODAY_DIR*. Contains the default value if unset in the environment.
 	- $*TODAY_SUFFIX*  See *TODAY_SUFFIX*. Contains the default value if unset in the environment.
 
-	If unset or empty the following value is used:
+	The command may be modified to edit any other arbitrary files if
+	supported by $*EDITOR*, i.e. keeping a file with notes that persist
+	between days. If unset or empty the following value is used:
 	```
-	vim -c "abo sp $TODAY_TODO" -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"
+	vim -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"
 	```
 
 *TODAY_DIR*

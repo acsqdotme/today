@@ -44,12 +44,6 @@ journal_files() {
 		valid_journal_files
 }
 
-# Usage: todo_file
-# Print the filename of the to-do file.
-todo_file() {
-	printf '%s/todo%s\n' "$TODAY_DIR" "$TODAY_SUFFIX"
-}
-
 # Usage: valid_journal_files
 # Read filenames from standard input and print only those that correspond to
 # valid today journals on standard output. Checks that the files are in
@@ -107,8 +101,6 @@ edit_file() (
 		return 2
 	fi
 	mkdir -p "${TODAY_FILE%/*}"
-	# shellcheck disable=SC2034
-	TODAY_TODO=$(todo_file)
 	set +e
 	eval "$TODAY_CMD"
 	set -e
@@ -126,7 +118,7 @@ search_files() (
 	IFS='
 	'
 	# shellcheck disable=SC2046
-	grep "$@" "$(todo_file)" $(journal_files)
+	grep "$@" $(journal_files)
 )
 
 view_files() (
@@ -171,7 +163,7 @@ pager_if_terminal() {
 
 
 # shellcheck disable=SC2016
-TODAY_CMD=${TODAY_CMD:-'vim -c "above sp $TODAY_TODO" -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"'}
+TODAY_CMD=${TODAY_CMD:-'vim -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"'}
 TODAY_DIR=${TODAY_DIR-${XDG_DATA_HOME:-${HOME}/.local/share}/today}
 TODAY_SUFFIX=${TODAY_SUFFIX-.md}
 
