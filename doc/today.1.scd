@@ -61,7 +61,7 @@ $*TODAY_SUFFIX* environment variable as a suffix.
 	supported by $*EDITOR*, i.e. keeping a file with notes that persist
 	between days. If unset or empty the following value is used:
 	```
-	vim -c "tabe $TODAY_DIR" -c "tabr" "$TODAY_FILE"
+	$EDITOR "$TODAY_FILE"
 	```
 
 *TODAY_DIR*
