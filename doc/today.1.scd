@@ -73,6 +73,10 @@ $*TODAY_SUFFIX* environment variable as a suffix.
 	The suffix added after the date in journal filenames. Defaults to *.md*
 	if unset.
 
+*EDITOR*
+	The program used to edit journal files. Defaults to *vi*(1) if unset or
+	empty.
+
 *PAGER*
 	The program to which the output of *today* *log* is piped. Defaults to
 	*more*(1) if unset or empty.
@@ -80,7 +84,7 @@ $*TODAY_SUFFIX* environment variable as a suffix.
 
 # SEE ALSO
 
-*eval*(1), *grep*(1), *more*(1)
+*eval*(1), *grep*(1), *vi*(1), *more*(1)
 
 
 # AUTHOR

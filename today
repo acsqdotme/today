@@ -163,7 +163,7 @@ pager_if_terminal() {
 
 
 # shellcheck disable=SC2016
-TODAY_CMD=${TODAY_CMD:-'$EDITOR "$TODAY_FILE"'}
+TODAY_CMD=${TODAY_CMD:-'${EDITOR:-vi} "$TODAY_FILE"'}
 TODAY_DIR=${TODAY_DIR-${XDG_DATA_HOME:-${HOME}/.local/share}/today}
 TODAY_SUFFIX=${TODAY_SUFFIX-.md}
 
