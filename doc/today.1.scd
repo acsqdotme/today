@@ -35,6 +35,10 @@ Journal files are stored in the directory specified in the $*TODAY_DIR*
 environment variable with a _YYYY-MM-DD_ basename and the contents of the
 $*TODAY_SUFFIX* environment variable as a suffix.
 
+Configuration is done through environment variables. This allows keeping
+multiple different journals by creating aliases or wrapper scripts that set the
+appropriate environment variables e.g. using *env*(1).
+
 
 # OPTIONS
 
@@ -84,7 +88,7 @@ $*TODAY_SUFFIX* environment variable as a suffix.
 
 # SEE ALSO
 
-*grep*(1), *eval*(1), *vi*(1), *more*(1)
+*grep*(1), *env*(1), *eval*(1), *vi*(1), *more*(1)
 
 
 # AUTHOR
