@@ -84,7 +84,7 @@ $*TODAY_SUFFIX* environment variable as a suffix.
 
 # SEE ALSO
 
-*eval*(1), *grep*(1), *vi*(1), *more*(1)
+*grep*(1), *eval*(1), *vi*(1), *more*(1)
 
 
 # AUTHOR
